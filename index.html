@@ -3,332 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elaine & Walter - Elétrica</title>
+    <title>Projeto Elétrico - Walter & Elaine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; padding-bottom: 90px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         h1, h2, h3, .fun-font { font-family: 'Fredoka', sans-serif; }
         
         @media (min-width: 768px) { 
-            body { height: 100vh; overflow: hidden; padding-bottom: 0; display: flex; flex-direction: column; } 
-            .scroll-area { flex: 1; overflow-y: auto; }
+            body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; } 
+            .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 40px; }
+        }
+        @media (max-width: 767px) {
+            body { padding-bottom: 90px; min-height: 100vh; }
+            .scroll-area { padding-bottom: 40px; }
         }
         
-        .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .tab-content { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
         .tab-content.active { display: block; opacity: 1; }
         
-        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
+        .card-hover { transition: all 0.2s; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 16px -4px rgba(0,0,0,0.1); }
 
-        /* Phase Colors */
-        .phase-r { background-color: #ef4444; color: white; }
-        .phase-s { background-color: #1e293b; color: white; }
-        .phase-t { background-color: #eab308; color: black; }
+        .bg-phase-r { background-color: #ef4444; color: white; }
+        .bg-phase-s { background-color: #1e293b; color: white; }
+        .bg-phase-t { background-color: #facc15; color: black; }
         
         .auth-tab { cursor: pointer; padding-bottom: 8px; border-bottom: 3px solid transparent; color: #94a3b8; transition: all 0.2s; }
         .auth-tab.active { border-color: #6366f1; color: #6366f1; font-weight: 700; }
 
-        /* Filtros Ativos */
         .filter-btn { transition: all 0.2s; border: 1px solid #e2e8f0; }
-        .filter-btn.active { background-color: #4338ca; color: white; border-color: #4338ca; box-shadow: 0 4px 6px -1px rgba(67, 56, 202, 0.4); }
+        .filter-btn.active { background-color: #4338ca; color: white; border-color: #4338ca; }
         .filter-btn:not(.active) { background-color: white; color: #64748b; }
-        .filter-btn:not(.active):hover { background-color: #f8fafc; }
-
-        /* Tabela Orçamento Responsiva */
-        .budget-table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 1rem; border: 1px solid #e2e8f0; }
-        .budget-table th, .budget-table td { white-space: nowrap; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
     </style>
 </head>
 <body class="text-slate-800 bg-slate-50">
 
-    <!-- TELA LOGIN -->
-    <div id="auth-screen" class="fixed inset-0 bg-gradient-to-br from-indigo-600 to-violet-600 z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 relative overflow-hidden">
-            <div class="text-center mb-6">
-                <div class="bg-indigo-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">⚡</div>
-                <h1 class="text-3xl font-bold text-slate-800 mb-1">Elaine & Walter</h1>
-                <p class="text-slate-500 text-sm font-medium">Projeto Elétrico Inteligente</p>
-            </div>
-
-            <div class="flex justify-center gap-8 mb-6 border-b border-slate-100">
-                <div onclick="window.app.switchAuthMode('login')" id="tab-login" class="auth-tab active">Entrar</div>
-                <div onclick="window.app.switchAuthMode('register')" id="tab-register" class="auth-tab">Criar Conta</div>
-            </div>
-
-            <div class="space-y-4">
-                <input id="auth-email" type="email" class="w-full border-2 border-slate-100 rounded-xl p-3.5 outline-none focus:border-indigo-500 transition bg-slate-50 focus:bg-white font-medium text-slate-700" placeholder="Seu e-mail">
-                <input id="auth-pass" type="password" class="w-full border-2 border-slate-100 rounded-xl p-3.5 outline-none focus:border-indigo-500 transition bg-slate-50 focus:bg-white font-medium text-slate-700" placeholder="Senha secreta">
-                
-                <div id="auth-error" class="hidden bg-red-50 border border-red-100 rounded-xl p-3 text-center">
-                    <p id="auth-error-text" class="text-red-600 text-xs font-bold"></p>
+    <!-- LOGIN -->
+    <div id="auth-screen" class="fixed inset-0 bg-gradient-to-br from-slate-900 to-slate-800 z-50 overflow-y-auto">
+        <div class="min-h-full flex items-center justify-center p-4 py-10">
+            <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 relative">
+                <div class="text-center mb-6">
+                    <div class="bg-indigo-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">⚡</div>
+                    <h1 class="text-2xl font-bold text-slate-800 mb-1 fun-font">Projeto Elétrico</h1>
+                    <p class="text-slate-500 text-xs font-medium">Walter & Elaine • NBR 5410</p>
                 </div>
-
-                <button onclick="window.app.handleAuthAction()" id="btn-auth-action" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition transform active:scale-[0.98] text-lg">
-                    ACESSAR PROJETO
-                </button>
+                <div class="flex justify-center gap-8 mb-6 border-b border-slate-100">
+                    <div onclick="window.app.switchAuthMode('login')" id="tab-login" class="auth-tab active">Entrar</div>
+                    <div onclick="window.app.switchAuthMode('register')" id="tab-register" class="auth-tab">Criar</div>
+                </div>
+                <div class="space-y-4">
+                    <input id="auth-email" type="email" class="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-indigo-500 text-sm transition-colors" placeholder="Email" autocomplete="email">
+                    <input id="auth-pass" type="password" class="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-indigo-500 text-sm transition-colors" placeholder="Senha" autocomplete="current-password">
+                    <div id="auth-error" class="hidden bg-red-50 text-red-600 text-xs p-3 rounded-lg text-center font-bold border border-red-100"></div>
+                    <button onclick="window.app.handleAuthAction()" id="btn-auth-action" class="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition text-sm active:scale-95">ACESSAR PROJETO</button>
+                </div>
             </div>
-            <p class="text-center text-[10px] text-slate-300 mt-6">Residência Unifamiliar - PB</p>
         </div>
     </div>
 
-    <!-- APP INTERFACE -->
+    <!-- APP -->
     <div id="app-interface" class="hidden flex-col h-full">
-        <!-- HEADER -->
         <header class="bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-sm z-20 sticky top-0">
             <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-2.5 rounded-xl shadow-lg shadow-orange-200 transform -rotate-3">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12H11l2-8z"/></svg>
-                </div>
-                <div>
-                    <h1 class="font-bold text-xl text-slate-800 leading-none fun-font">Projeto Elétrico</h1>
-                    <p class="text-[10px] font-bold text-indigo-500 tracking-wide uppercase mt-0.5">Elaine & Walter</p>
-                </div>
+                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-md"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12H11l2-8z"/></svg></div>
+                <div><h1 class="font-bold text-lg text-slate-800 leading-none fun-font">Dimensionamento</h1><p class="text-[10px] font-bold text-indigo-600 uppercase mt-0.5">Precisão NBR 5410</p></div>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="hidden md:flex bg-slate-100 p-1.5 rounded-xl gap-1">
-                    <button onclick="window.app.setTab('rooms')" id="nav-rooms" class="px-4 py-2 rounded-lg text-xs font-bold transition bg-white shadow-sm text-indigo-600">🏡 Cômodos</button>
-                    <button onclick="window.app.setTab('circuits')" id="nav-circuits" class="px-4 py-2 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900 hover:bg-white">⚡ Circuitos</button>
-                    <button onclick="window.app.setTab('bom')" id="nav-bom" class="px-4 py-2 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900 hover:bg-white">📋 Materiais</button>
-                    <button onclick="window.app.setTab('budget')" id="nav-budget" class="px-4 py-2 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900 hover:bg-white">💰 Custos</button>
+            <div class="flex items-center gap-2">
+                <button onclick="window.app.editSettings()" class="hidden md:flex bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold items-center gap-1 hover:bg-slate-200">⚙️ Config</button>
+                <div class="hidden md:flex bg-slate-100 p-1 rounded-lg gap-1">
+                    <button onclick="window.app.setTab('rooms')" id="nav-rooms" class="px-3 py-1.5 rounded-md text-xs font-bold bg-white text-indigo-600 shadow-sm">Planta</button>
+                    <button onclick="window.app.setTab('circuits')" id="nav-circuits" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-500">Cálculos</button>
+                    <button onclick="window.app.setTab('bom')" id="nav-bom" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-500">Materiais</button>
                 </div>
-                <button onclick="window.app.handleLogout()" class="bg-red-50 text-red-500 hover:bg-red-100 p-2.5 rounded-xl transition" title="Sair">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                </button>
+                <button onclick="window.app.handleLogout()" class="bg-red-50 text-red-500 p-2 rounded-lg hover:bg-red-100"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
             </div>
         </header>
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="scroll-area p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 h-full">
+        <main class="scroll-area p-4 md:p-6 max-w-6xl mx-auto w-full space-y-6">
             
             <!-- ABA 1: CÔMODOS -->
             <div id="tab-rooms" class="tab-content active">
-                <div class="flex flex-col md:flex-row justify-between md:items-end mb-6 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800 fun-font">Ambientes da Casa</h2>
-                        <p class="text-slate-500 text-sm font-medium">Filtre por andar para facilitar a visão.</p>
-                    </div>
-                    <button onclick="window.app.promptAddRoom()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 transition transform active:scale-95 flex items-center justify-center gap-2 w-full md:w-auto">
-                        <span class="text-xl leading-none">+</span> Novo Cômodo
-                    </button>
+                <div class="flex justify-between items-end mb-4">
+                    <div><h2 class="text-xl font-bold text-slate-800 fun-font">Cômodos</h2><p class="text-slate-500 text-xs">Gerencie os pontos de consumo.</p></div>
+                    <button onclick="window.app.promptAddRoom()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg text-sm flex items-center gap-1 hover:bg-indigo-700 transition transform active:scale-95"><span>+</span> Cômodo</button>
                 </div>
-
-                <!-- Filtros de Andar (CORRIGIDO) -->
-                <div class="flex gap-2 mb-6 overflow-x-auto pb-2 snap-x">
-                    <button onclick="window.app.filterFloor('all', this)" class="filter-btn active snap-start shrink-0 px-5 py-2 rounded-full text-xs font-bold shadow-sm">Todos</button>
-                    <button onclick="window.app.filterFloor('subsolo', this)" class="filter-btn snap-start shrink-0 px-5 py-2 rounded-full text-xs font-bold shadow-sm">Subsolo 🚗</button>
-                    <button onclick="window.app.filterFloor('terreo', this)" class="filter-btn snap-start shrink-0 px-5 py-2 rounded-full text-xs font-bold shadow-sm">Térreo 🏠</button>
-                    <button onclick="window.app.filterFloor('superior', this)" class="filter-btn snap-start shrink-0 px-5 py-2 rounded-full text-xs font-bold shadow-sm">1º Andar 🛌</button>
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-1 snap-x">
+                    <button onclick="window.app.filterFloor('all', this)" class="filter-btn active snap-start px-4 py-1.5 rounded-full text-xs font-bold">Todos</button>
+                    <button onclick="window.app.filterFloor('subsolo', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold">Subsolo</button>
+                    <button onclick="window.app.filterFloor('terreo', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold">Térreo</button>
+                    <button onclick="window.app.filterFloor('superior', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold">Superior</button>
                 </div>
-
-                <div id="rooms-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                    <!-- Preenchido via JS -->
-                </div>
+                <div id="rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
 
-            <!-- ABA 2: CIRCUITOS E BALANCEAMENTO -->
+            <!-- ABA 2: CÁLCULOS -->
             <div id="tab-circuits" class="tab-content">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800 fun-font">Quadros de Distribuição</h2>
-                        <p class="text-slate-500 text-sm">Equilíbrio de fases (R, S, T).</p>
+                
+                <!-- PAINEL GERAL -->
+                <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-lg mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 opacity-10 text-[100px]">⚡</div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <div>
+                            <h2 class="text-xl font-bold fun-font text-yellow-400">Proteção Geral</h2>
+                            <p class="text-slate-400 text-xs">Disjuntor e Cabos de Entrada.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="window.app.editSettings()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">⚙️ Config FP</button>
+                            <button onclick="window.app.editMainParams()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">📏 Distância</button>
+                        </div>
                     </div>
-                    <button onclick="window.app.promptAddCircuit()" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition flex items-center gap-2">
-                        <span>⚡</span> Novo Circuito
-                    </button>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
+                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">Disjuntor Geral</p>
+                            <p id="gen-breaker" class="text-2xl font-bold text-white">-- A</p>
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">Cabo Entrada</p>
+                            <p id="gen-cable" class="text-2xl font-bold text-green-400">-- mm²</p>
+                            <p id="gen-dist" class="text-[9px] text-slate-500">Dist: -- m</p>
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">Potência Ativa</p>
+                            <p id="gen-load-w" class="text-xl font-bold text-yellow-400">-- W</p>
+                            <p class="text-[9px] text-slate-500">Uso Real (Energia)</p>
+                        </div>
+                         <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">Potência Aparente</p>
+                            <p id="gen-load-va" class="text-xl font-bold text-blue-300">-- VA</p>
+                             <p class="text-[9px] text-slate-500">Dimensionamento</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-3 mb-8">
-                    <div class="bg-white p-3 rounded-2xl border-b-4 border-red-500 shadow-sm flex flex-col items-center">
-                        <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-1 font-bold">R</div>
-                        <div id="load-r" class="text-lg md:text-2xl font-black text-slate-800">0 W</div>
+                <!-- EQUILIBRIO -->
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wide">Balanceamento (Ativo)</h3>
+                    <button onclick="window.app.promptAddCircuit()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-indigo-700">+ Circuito</button>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="bg-white p-3 rounded-xl border-b-4 border-red-500 shadow-sm text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Fase R</span>
+                        <div id="load-r-w" class="text-lg font-black text-red-600">0 W</div>
+                        <div id="load-r-a" class="text-[10px] font-mono text-slate-500 mt-1">0.0 A</div>
                     </div>
-                    <div class="bg-white p-3 rounded-2xl border-b-4 border-slate-800 shadow-sm flex flex-col items-center">
-                         <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-800 flex items-center justify-center mb-1 font-bold">S</div>
-                        <div id="load-s" class="text-lg md:text-2xl font-black text-slate-800">0 W</div>
+                    <div class="bg-white p-3 rounded-xl border-b-4 border-slate-900 shadow-sm text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Fase S</span>
+                        <div id="load-s-w" class="text-lg font-black text-slate-900">0 W</div>
+                        <div id="load-s-a" class="text-[10px] font-mono text-slate-500 mt-1">0.0 A</div>
                     </div>
-                    <div class="bg-white p-3 rounded-2xl border-b-4 border-yellow-400 shadow-sm flex flex-col items-center">
-                         <div class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center mb-1 font-bold">T</div>
-                        <div id="load-t" class="text-lg md:text-2xl font-black text-slate-800">0 W</div>
+                    <div class="bg-white p-3 rounded-xl border-b-4 border-yellow-400 shadow-sm text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Fase T</span>
+                        <div id="load-t-w" class="text-lg font-black text-yellow-600">0 W</div>
+                        <div id="load-t-a" class="text-[10px] font-mono text-slate-500 mt-1">0.0 A</div>
                     </div>
                 </div>
 
-                <div class="grid lg:grid-cols-2 gap-8">
-                    <div class="bg-slate-50 rounded-3xl border border-slate-200 overflow-hidden">
-                        <div class="bg-white px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                            <h3 class="font-bold text-slate-800 flex items-center gap-2">🏠 Quadro Térreo</h3>
-                            <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-1 rounded-lg">Principal</span>
-                        </div>
-                        <div id="list-qd-terreo" class="p-3 space-y-2"></div>
+                <!-- LISTAS -->
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center px-2"><h3 class="font-bold text-slate-700">🏠 QD Térreo</h3><span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">Quadro 1</span></div>
+                        <div id="list-qd-terreo" class="space-y-2"></div>
                     </div>
-                    <div class="bg-slate-50 rounded-3xl border border-slate-200 overflow-hidden">
-                        <div class="bg-white px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                            <h3 class="font-bold text-slate-800 flex items-center gap-2">🛌 Quadro 1º Andar</h3>
-                            <span class="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded-lg">Secundário</span>
-                        </div>
-                        <div id="list-qd-superior" class="p-3 space-y-2"></div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center px-2"><h3 class="font-bold text-slate-700">🛌 QD Superior</h3><span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">Quadro 2</span></div>
+                        <div id="list-qd-superior" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
 
             <!-- ABA 3: MATERIAIS -->
             <div id="tab-bom" class="tab-content">
-                <h2 class="text-2xl font-bold text-slate-800 fun-font mb-6">Lista de Materiais</h2>
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                        <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><span class="text-xl">📦</span> Itens e Acabamentos</h3>
-                        <div id="bom-devices" class="space-y-3"></div>
-                    </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
-                        <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><span class="text-xl">🧶</span> Cabos (Estimativa)</h3>
-                        <div id="bom-cables" class="space-y-4"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA 4: ORÇAMENTO (CORRIGIDA) -->
-            <div id="tab-budget" class="tab-content">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800 fun-font">Orçamento</h2>
-                        <p class="text-slate-500 text-sm">Valores de João Pessoa - PB</p>
-                    </div>
-                    <button onclick="window.app.confirmReset()" class="text-red-500 hover:bg-red-50 px-3 py-2 rounded-lg text-xs font-bold transition border border-red-100">Resetar</button>
-                </div>
+                <h2 class="text-xl font-bold text-slate-800 fun-font mb-4">Quantitativo e Custos</h2>
+                <div id="bom-cables" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
+                <div id="bom-items" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
                 
-                <div class="bg-white shadow-sm budget-table-container">
-                    <table class="w-full text-left text-sm budget-table">
-                        <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
-                            <tr>
-                                <th class="p-4 font-semibold sticky left-0 bg-slate-50 z-10 shadow-[1px_0_0_0_rgba(0,0,0,0.05)]">Item</th>
-                                <th class="p-4 font-semibold text-center">Qtd</th>
-                                <th class="p-4 font-semibold text-right">Unit. (R$)</th>
-                                <th class="p-4 font-semibold text-right pr-6">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="budget-tbody" class="divide-y divide-slate-100"></tbody>
-                        <tfoot class="bg-slate-900 text-white font-bold text-lg">
-                            <tr>
-                                <td class="p-5 sticky left-0 bg-slate-900 z-10">TOTAL GERAL</td>
-                                <td colspan="3" id="budget-total" class="p-5 text-right text-yellow-400 pr-6">R$ 0,00</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-12">
+                    <div class="bg-slate-900 text-white px-4 py-3"><h3 class="font-bold text-sm">Orçamento Detalhado</h3></div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left text-sm min-w-[450px]">
+                            <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                                <tr><th class="p-3 font-semibold">Item</th><th class="p-3 text-center">Qtd</th><th class="p-3 text-right">Unit (R$)</th><th class="p-3 text-right">Total</th></tr>
+                            </thead>
+                            <tbody id="budget-tbody" class="divide-y divide-slate-100"></tbody>
+                            <tfoot class="bg-yellow-50 text-slate-900 font-bold border-t-2 border-yellow-200">
+                                <tr><td colspan="3" class="p-4 text-right uppercase text-xs tracking-wide">Total Geral</td><td id="budget-total" class="p-4 text-right text-lg text-indigo-700">R$ 0,00</td></tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
-                <p class="text-center text-slate-400 text-xs mt-4">Arraste a tabela para o lado para ver mais detalhes ↔️</p>
             </div>
-
         </main>
     </div>
 
     <!-- MENU MOBILE -->
-    <div id="mobile-menu" class="md:hidden hidden fixed bottom-0 w-full bg-white/95 backdrop-blur border-t border-slate-200 p-2 justify-around z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] safe-area-pb">
-        <button onclick="window.app.setTab('rooms')" id="mob-rooms" class="flex-1 py-1 text-indigo-600 flex flex-col items-center gap-1">
-            <span class="text-xl">🏡</span><span class="text-[10px] font-bold">Cômodos</span>
-        </button>
-        <button onclick="window.app.setTab('circuits')" id="mob-circuits" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1">
-            <span class="text-xl">⚡</span><span class="text-[10px] font-bold">Circuitos</span>
-        </button>
-        <button onclick="window.app.setTab('bom')" id="mob-bom" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1">
-            <span class="text-xl">📋</span><span class="text-[10px] font-bold">Lista</span>
-        </button>
-        <button onclick="window.app.setTab('budget')" id="mob-budget" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1">
-            <span class="text-xl">💰</span><span class="text-[10px] font-bold">R$</span>
-        </button>
+    <div id="mobile-menu" class="md:hidden hidden fixed bottom-0 w-full bg-white border-t border-slate-200 p-2 justify-around z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] safe-area-pb">
+        <button onclick="window.app.setTab('rooms')" id="mob-rooms" class="flex-1 py-1 text-indigo-600 flex flex-col items-center gap-1"><span class="text-xl">🏡</span><span class="text-[9px] font-bold">Planta</span></button>
+        <button onclick="window.app.setTab('circuits')" id="mob-circuits" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1"><span class="text-xl">⚡</span><span class="text-[9px] font-bold">Cálculos</span></button>
+        <button onclick="window.app.setTab('bom')" id="mob-bom" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1"><span class="text-xl">📋</span><span class="text-[9px] font-bold">Materiais</span></button>
     </div>
 
-    <!-- MODAIS -->
+    <!-- MODAL -->
     <div id="generic-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
-            <h3 id="g-modal-title" class="text-xl font-bold text-slate-800 mb-2 fun-font"></h3>
-            <p id="g-modal-desc" class="text-sm text-slate-500 mb-4 hidden"></p>
-            <input id="g-modal-input" class="w-full border-2 border-slate-200 rounded-xl p-3 mb-4 hidden outline-none focus:border-indigo-500 text-slate-700 font-medium" autocomplete="off">
-            <div class="flex justify-end gap-3 mt-2">
-                <button onclick="window.app.closeModal()" class="px-5 py-2 text-slate-500 font-bold text-xs">Cancelar</button>
-                <button id="g-modal-confirm-btn" class="px-5 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold text-xs shadow-lg">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="item-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-xl font-bold text-slate-800 fun-font">Adicionar Ponto</h3>
-                <button onclick="window.app.closeItemModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500">&times;</button>
-            </div>
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Item</label>
-                        <select id="i-type" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none text-sm font-medium focus:border-indigo-500">
-                            <option value="light">💡 Luz</option>
-                            <option value="outlet">🔌 Tomada 10A</option>
-                            <option value="outlet20">🛑 Tomada 20A</option>
-                            <option value="switch">🔘 Interruptor</option>
-                            <option value="equipment">❄️ Ar/Chuv</option>
-                        </select>
-                    </div>
-                    <div>
-                         <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Potência (W)</label>
-                        <input id="i-watt" type="number" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 text-sm font-medium" value="100">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Nome</label>
-                    <input id="i-name" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 text-sm font-medium" placeholder="Ex: Tomada Geladeira">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Circuito</label>
-                    <select id="i-circ" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-white outline-none focus:border-indigo-500 text-sm font-medium"></select>
-                </div>
-                <button id="item-save-btn" class="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 mt-2">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="circuit-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6">
-            <h3 class="text-xl font-bold text-slate-800 fun-font mb-4">Configurar Circuito</h3>
-            <div class="space-y-4">
-                <input id="c-name" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 text-sm font-medium" placeholder="Nome (Ex: Iluminação Térreo)">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Quadro</label>
-                        <select id="c-qd" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none text-sm">
-                            <option value="terreo">🏠 Térreo</option>
-                            <option value="superior">🛌 1º Andar</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Fase</label>
-                        <select id="c-phase" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none text-sm">
-                            <option value="r">🔴 Vermelha (R)</option>
-                            <option value="s">⚫ Preta (S)</option>
-                            <option value="t">🟡 Amarela (T)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Fio (mm²)</label>
-                        <select id="c-gauge" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none text-sm">
-                            <option value="1.5">1.5 mm²</option>
-                            <option value="2.5">2.5 mm²</option>
-                            <option value="4.0">4.0 mm²</option>
-                            <option value="6.0">6.0 mm²</option>
-                            <option value="10.0">10.0 mm²</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Dist. (m)</label>
-                        <input id="c-dist" type="number" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none text-sm" value="15">
-                    </div>
-                </div>
-                <div class="flex justify-end gap-3 mt-4">
-                    <button onclick="document.getElementById('circuit-modal').classList.add('hidden')" class="px-5 py-2 text-slate-500 font-bold text-xs">Cancelar</button>
-                    <button id="c-save-btn" class="px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-lg">Salvar</button>
-                </div>
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 max-h-[90vh] overflow-y-auto">
+            <h3 id="g-modal-title" class="text-lg font-bold text-slate-800 mb-2 fun-font"></h3>
+            <div id="g-modal-content"></div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button onclick="window.app.closeModal()" class="px-4 py-2 text-slate-500 font-bold text-xs rounded-lg hover:bg-slate-50">Cancelar</button>
+                <button id="g-modal-confirm" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-bold text-xs shadow">Confirmar</button>
             </div>
         </div>
     </div>
@@ -338,262 +228,309 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyByJ0jEYJm1ZbwJEWJy5uTwCVn2M3LA644",
-            authDomain: "elainehouse-c4b4b.firebaseapp.com",
-            projectId: "elainehouse-c4b4b",
-            storageBucket: "elainehouse-c4b4b.firebasestorage.app",
-            messagingSenderId: "105394705921",
-            appId: "1:105394705921:web:63c7993c59514ecd3ad200",
-            measurementId: "G-TKZ37YREMG"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyByJ0jEYJm1ZbwJEWJy5uTwCVn2M3LA644", authDomain: "elainehouse-c4b4b.firebaseapp.com", projectId: "elainehouse-c4b4b", storageBucket: "elainehouse-c4b4b.firebasestorage.app", messagingSenderId: "105394705921", appId: "1:105394705921:web:63c7993c59514ecd3ad200", measurementId: "G-TKZ37YREMG" };
+
+        const app = initializeApp(firebaseConfig); const AUTH = getAuth(app); const db = getFirestore(app);
 
         const defaultData = {
+            settings: { globalPF: 0.92 },
+            mainParams: { dist: 20 },
             rooms: [
-                { id: 1, name: "🚗 Garagem (Subsolo)", floor: "subsolo", items: [] },
-                { id: 2, name: "🛋️ Sala Estar/Jantar", floor: "terreo", items: [] },
-                { id: 3, name: "🍳 Cozinha", floor: "terreo", items: [] },
-                { id: 4, name: "🍖 Terraço Gourmet", floor: "terreo", items: [] },
-                { id: 5, name: "🛏️ Quarto 01 (Térreo)", floor: "terreo", items: [] },
-                { id: 6, name: "🚽 WCB 01 Social", floor: "terreo", items: [] },
-                { id: 7, name: "🧹 Área de Serviço", floor: "terreo", items: [] },
-                { id: 8, name: "📦 Depósito", floor: "terreo", items: [] },
-                { id: 9, name: "🏊 Deck / Piscina", floor: "terreo", items: [] },
-                { id: 10, name: "👑 Suíte Master", floor: "superior", items: [] },
-                { id: 11, name: "👗 Closet Master", floor: "superior", items: [] },
-                { id: 12, name: "🚿 WCB Suíte", floor: "superior", items: [] },
-                { id: 13, name: "🖥️ Escritório", floor: "superior", items: [] },
-                { id: 14, name: "🛏️ Quarto 02", floor: "superior", items: [] },
-                { id: 15, name: "🛏️ Quarto 03", floor: "superior", items: [] },
-                { id: 16, name: "🚽 WCB 03 Social", floor: "superior", items: [] },
-                { id: 17, name: "🚶 Circulação Sup.", floor: "superior", items: [] }
+                { id: 1, name: "Garagem (Subsolo)", floor: "subsolo", type: "external", items: [] },
+                { id: 2, name: "Sala Estar/Jantar", floor: "terreo", type: "living", items: [] },
+                { id: 3, name: "Cozinha", floor: "terreo", type: "kitchen", items: [] },
+                { id: 4, name: "Terraço Gourmet", floor: "terreo", type: "kitchen", items: [] },
+                { id: 5, name: "Área de Serviço", floor: "terreo", type: "kitchen", items: [] },
+                { id: 6, name: "Depósito", floor: "terreo", type: "living", items: [] },
+                { id: 7, name: "Quarto 01 (Térreo)", floor: "terreo", type: "living", items: [{ id: 701, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 401 }] },
+                { id: 8, name: "WCB 01 Social", floor: "terreo", type: "bathroom", items: [{ id: 801, type: 'equipment', name: 'Chuveiro 7500W', va: 7500, pf: 1.0, circuitId: 301 }] },
+                { id: 9, name: "Suíte Master", floor: "superior", type: "living", items: [{ id: 901, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 402 }] },
+                { id: 10, name: "Closet Master", floor: "superior", type: "living", items: [] },
+                { id: 11, name: "WCB Suíte", floor: "superior", type: "bathroom", items: [{ id: 1101, type: 'equipment', name: 'Chuveiro 7500W', va: 7500, pf: 1.0, circuitId: 302 }] },
+                { id: 12, name: "Escritório", floor: "superior", type: "living", items: [{ id: 1201, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 403 }] },
+                { id: 13, name: "Quarto 02", floor: "superior", type: "living", items: [{ id: 1301, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 404 }] },
+                { id: 14, name: "Quarto 03", floor: "superior", type: "living", items: [{ id: 1401, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 405 }] },
+                { id: 15, name: "WCB 03 Social", floor: "superior", type: "bathroom", items: [{ id: 1501, type: 'equipment', name: 'Chuveiro 7500W', va: 7500, pf: 1.0, circuitId: 303 }] },
+                { id: 16, name: "Circulação", floor: "superior", type: "living", items: [] }
             ],
             circuits: [
-                { id: 1, name: "Iluminação Térreo", qd: "terreo", phase: "r", gauge: "1.5", dist: 20 },
-                { id: 2, name: "TUGs Cozinha", qd: "terreo", phase: "s", gauge: "2.5", dist: 15 },
-                { id: 3, name: "Ar Cond. Suíte", qd: "superior", phase: "t", gauge: "4.0", dist: 25 },
-                { id: 4, name: "Chuveiro Master", qd: "superior", phase: "r", gauge: "6.0", dist: 20 }
+                { id: 1, name: "Iluminação Térreo", qd: "terreo", phase: "r", gauge: "1.5", usage: "lighting", dist: 20, pf: 1.0 },
+                { id: 2, name: "TUGs Cozinha", qd: "terreo", phase: "s", gauge: "4.0", usage: "power", dist: 15, pf: 0.92 },
+                // Chuveiros 7500W
+                { id: 301, name: "Chuveiro WCB 01", qd: "terreo", phase: "t", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 35 },
+                { id: 302, name: "Chuveiro Suíte", qd: "superior", phase: "r", gauge: "6.0", usage: "specific", dist: 10, pf: 1.0, customAmp: 35 },
+                { id: 303, name: "Chuveiro WCB 03", qd: "superior", phase: "s", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 35 },
+                // Ar Condicionados
+                { id: 401, name: "AC Quarto 01", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 15, pf: 0.92 },
+                { id: 402, name: "AC Suíte", qd: "superior", phase: "t", gauge: "2.5", usage: "specific", dist: 10, pf: 0.92 },
+                { id: 403, name: "AC Escritório", qd: "superior", phase: "t", gauge: "2.5", usage: "specific", dist: 12, pf: 0.92 },
+                { id: 404, name: "AC Quarto 02", qd: "superior", phase: "r", gauge: "2.5", usage: "specific", dist: 15, pf: 0.92 },
+                { id: 405, name: "AC Quarto 03", qd: "superior", phase: "s", gauge: "2.5", usage: "specific", dist: 18, pf: 0.92 }
             ],
-            prices: { outlet: 14.50, outlet20: 18.90, light: 25.00, switch: 12.00, equipment: 0, breaker: 18.50, 'cable1.5': 1.60, 'cable2.5': 2.40, 'cable4.0': 4.80, 'cable6.0': 7.50, 'cable10.0': 14.00, board: 135.00 }
+            prices: { 
+                outlet: 14.50, outlet2: 22.00, outlet3: 29.90, outlet20: 18.90, equipment: 0,
+                light: 12.00, switch: 12.00, switch2: 18.90, switch3: 25.50, switch3w: 19.90, 
+                breaker: 25.00, breakerMain: 120.00, dr: 180.00, board: 135.00, 
+                'cable1.5': 1.60, 'cable2.5': 2.40, 'cable4.0': 4.80, 'cable6.0': 7.50, 'cable10.0': 14.00, 'cable16.0': 22.00, 'cable25.0': 35.00
+            }
         };
+
+        const NBR = { VOLTAGE: 220, TUG_RULES: { living: { base: 100, limit: 0 }, kitchen: { base: 600, limit: 3, extra: 100 }, bathroom: { base: 600, limit: 1 }, external: { base: 100, limit: 0 } } };
 
         let Project = JSON.parse(JSON.stringify(defaultData));
         let DB_REF = null;
-        let SAVE_TIMER = null;
-        let AUTH = null;
-        let currentAuthMode = 'login';
         let currentFloorFilter = 'all';
+        let SAVE_TIMER = null;
 
-        window.onload = () => {
-            try {
-                const app = initializeApp(firebaseConfig);
-                AUTH = getAuth(app);
-                const db = getFirestore(app);
-                
-                onAuthStateChanged(AUTH, (user) => {
-                    if (user) {
-                        document.getElementById('auth-screen').classList.add('hidden');
-                        document.getElementById('app-interface').classList.remove('hidden');
-                        document.getElementById('app-interface').classList.add('flex');
-                        document.getElementById('mobile-menu').classList.remove('hidden');
-                        document.getElementById('mobile-menu').classList.add('flex');
-                        DB_REF = doc(db, `users/${user.uid}/data/project_elaine_walter_v2`);
-                        onSnapshot(DB_REF, (snap) => {
-                            if (snap.exists()) {
-                                Project = snap.data();
-                                if(!Project.rooms) Project = JSON.parse(JSON.stringify(defaultData));
-                                renderAll();
-                            } else { saveCloud(true); }
-                        });
-                    } else {
-                        document.getElementById('auth-screen').classList.remove('hidden');
-                        document.getElementById('app-interface').classList.add('hidden');
-                        document.getElementById('app-interface').classList.remove('flex');
-                        document.getElementById('mobile-menu').classList.add('hidden');
-                        document.getElementById('mobile-menu').classList.remove('flex');
-                        DB_REF = null;
-                    }
+        onAuthStateChanged(AUTH, u => {
+            if(u) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-interface').classList.remove('hidden'); document.getElementById('app-interface').classList.add('flex');
+                document.getElementById('mobile-menu').classList.remove('hidden'); document.getElementById('mobile-menu').classList.add('flex');
+                DB_REF = doc(db, `users/${u.uid}/data/project_elaine_final_v12`);
+                onSnapshot(DB_REF, s => { 
+                    if(s.exists()) { 
+                        Project = s.data(); 
+                        if(!Project.prices) Project.prices = defaultData.prices;
+                        if(!Project.mainParams) Project.mainParams = defaultData.mainParams;
+                        if(!Project.settings) Project.settings = defaultData.settings;
+                        Object.keys(defaultData.prices).forEach(k => { if(Project.prices[k] === undefined) Project.prices[k] = defaultData.prices[k]; });
+                        defaultData.rooms.forEach(dr => { if(!Project.rooms.find(r => r.id === dr.id)) Project.rooms.push(dr); });
+                        defaultData.circuits.forEach(dc => { if(!Project.circuits.find(c => c.id === dc.id)) Project.circuits.push(dc); });
+                        recalcAllTUGs(); renderAll(); 
+                    } else saveCloud(true); 
                 });
-            } catch (e) { console.error(e); }
-        };
+            } else { document.getElementById('auth-screen').classList.remove('hidden'); document.getElementById('app-interface').classList.add('hidden'); document.getElementById('mobile-menu').classList.add('hidden'); }
+        });
 
-        window.app = window.app || {};
-        window.app.switchAuthMode = (mode) => {
-            currentAuthMode = mode;
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + mode).classList.add('active');
-            document.getElementById('btn-auth-action').innerText = mode === 'login' ? 'ACESSAR PROJETO' : 'CRIAR CONTA';
-            document.getElementById('auth-error').classList.add('hidden');
-        };
+        function saveCloud(immediate) { if(DB_REF) { clearTimeout(SAVE_TIMER); const fn = () => setDoc(DB_REF, Project).catch(console.error); if(immediate) fn(); else SAVE_TIMER = setTimeout(fn, 1000); } renderAll(); }
+        function renderAll() { renderRooms(); renderCircuits(); renderBOM(); }
 
-        window.app.handleAuthAction = async () => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            const btn = document.getElementById('btn-auth-action');
-            
-            if(!email || !pass) { document.getElementById('auth-error').classList.remove('hidden'); document.getElementById('auth-error-text').innerText = "Preencha tudo!"; return; }
-            
-            btn.innerText = "Carregando..."; btn.disabled = true;
-            try {
-                if(currentAuthMode === 'login') await signInWithEmailAndPassword(AUTH, email, pass);
-                else await createUserWithEmailAndPassword(AUTH, email, pass);
-            } catch (error) {
-                btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE";
-                document.getElementById('auth-error').classList.remove('hidden');
-                let msg = "Erro no acesso.";
-                if(error.code.includes('invalid') || error.code.includes('wrong')) msg = "Email ou senha inválidos.";
-                if(error.code.includes('email-already')) msg = "Email já cadastrado.";
-                if(error.code.includes('weak')) msg = "Senha muito fraca.";
-                document.getElementById('auth-error-text').innerText = msg;
-            }
-        };
-        
-        window.app.handleLogout = () => signOut(AUTH).then(() => window.location.reload());
-
-        function saveCloud(immediate = false) {
-            if (DB_REF) {
-                clearTimeout(SAVE_TIMER);
-                const save = () => setDoc(DB_REF, Project).catch(console.error);
-                if(immediate) save(); else SAVE_TIMER = setTimeout(save, 1000);
-            }
-            renderAll();
-        }
-
-        function renderAll() { renderRooms(); renderCircuits(); renderBOM(); renderBudget(); }
-        window.app.setTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
-            document.getElementById('tab-'+id).classList.add('active');
-            document.querySelectorAll('nav button, #mobile-menu button').forEach(b => {
-                b.classList.remove('text-indigo-600', 'bg-white', 'shadow-sm'); b.classList.add('text-slate-500');
-            });
-            document.querySelectorAll(`#nav-${id}, #mob-${id}`).forEach(b => {
-                b.classList.add('text-indigo-600', 'bg-white', 'shadow-sm'); b.classList.remove('text-slate-500');
-            });
-        };
-
-        // --- FILTRO CORRIGIDO ---
-        window.app.filterFloor = (floor, btnElement) => {
-            currentFloorFilter = floor;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            if(btnElement) btnElement.classList.add('active');
-            renderRooms();
+        function recalcAllTUGs() { 
+            const pf = Project.settings?.globalPF || 0.92;
+            Project.rooms.forEach(r => { 
+                if(!r.type) return; 
+                let tugs = r.items.filter(i => i.type === 'outlet'); 
+                const rule = NBR.TUG_RULES[r.type] || NBR.TUG_RULES.living; 
+                tugs.forEach((t, idx) => { 
+                    if(t.customVA) { t.va = t.customVA; } 
+                    else { if(rule.limit > 0) t.va = (idx < rule.limit) ? rule.base : (rule.extra || 100); else t.va = rule.base; } 
+                    t.power = Math.round(t.va * (t.pf || pf)); 
+                }); 
+            }); 
         }
 
         function renderRooms() {
             const grid = document.getElementById('rooms-grid'); grid.innerHTML = '';
             const filtered = currentFloorFilter === 'all' ? Project.rooms : Project.rooms.filter(r => r.floor === currentFloorFilter);
-
             filtered.forEach(r => {
-                const badge = r.floor === 'subsolo' ? "bg-gray-100 text-gray-500" : (r.floor === 'terreo' ? "bg-green-50 text-green-600" : "bg-blue-50 text-blue-600");
-                const itemsHtml = r.items.map(i => `
-                    <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 group">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-lg shadow-sm">
-                                ${i.type==='light'?'💡':i.type==='outlet'?'🔌':i.type==='outlet20'?'🛑':i.type==='switch'?'🔘':'❄️'}
-                            </div>
-                            <div><p class="text-xs font-bold text-slate-700 leading-none mb-0.5">${i.name}</p><div class="flex items-center gap-1"><span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">${i.power}W</span>${getCircuitBadge(i.circuitId)}</div></div>
-                        </div>
-                        <button onclick="window.app.delItem(${r.id}, ${i.id})" class="text-slate-300 hover:text-red-500 p-1.5 rounded-lg transition opacity-0 group-hover:opacity-100">✕</button>
-                    </div>`).join('');
-
-                grid.innerHTML += `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 card-hover flex flex-col relative">
-                        <div class="flex justify-between items-start mb-3">
-                            <div><span class="text-[9px] uppercase font-bold tracking-wider px-2 py-1 rounded-md ${badge} mb-1 inline-block">${r.floor}</span><h3 class="font-bold text-lg text-slate-800 fun-font leading-tight">${r.name}</h3></div>
-                            <div class="flex gap-1"><button onclick="window.app.addItem(${r.id})" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 w-8 h-8 rounded-xl flex items-center justify-center font-bold text-lg transition shadow-sm">+</button><button onclick="window.app.delRoom(${r.id})" class="text-slate-300 hover:text-red-400 hover:bg-red-50 w-8 h-8 rounded-xl flex items-center justify-center transition">🗑️</button></div>
-                        </div>
-                        <div class="flex-1 space-y-1 mb-2">${itemsHtml || '<div class="h-20 flex items-center justify-center text-xs text-slate-300 italic border-2 border-dashed border-slate-100 rounded-xl">Sem itens</div>'}</div>
-                    </div>`;
+                const itemsHtml = r.items.map(i => {
+                     let detail = ''; if(i.type==='outlet' || i.type==='switch') detail = `${i.modules||1} Seções`; if(i.isThreeWay) detail = 'Three-Way';
+                     return `<div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 group"><div class="flex items-center gap-2"><div class="text-lg">${i.type==='light'?'💡':i.type==='outlet'?'🔌':i.type==='outlet20'?'🛑':i.type==='switch'?'🔘':'❄️'}</div><div><div class="flex items-center gap-1"><p class="text-xs font-bold text-slate-700 leading-none">${i.name}</p>${getCircuitBadge(i.circuitId)}</div><div class="flex items-center gap-1 mt-0.5"><button onclick="window.app.editItem(${r.id}, ${i.id})" class="text-[9px] font-mono text-indigo-600 bg-indigo-50 px-1 rounded hover:bg-indigo-100">${i.va || '?'}VA ${detail} ✏️</button></div></div></div><button onclick="window.app.delItem(${r.id}, ${i.id})" class="text-slate-300 hover:text-red-500 p-1">✕</button></div>`;
+                }).join('');
+                grid.innerHTML += `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 card-hover relative"><div class="flex justify-between items-start mb-2"><div><span class="text-[9px] uppercase font-bold tracking-wider bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${r.floor}</span><h3 class="font-bold text-lg text-slate-800 fun-font">${r.name}</h3></div><button onclick="window.app.modalAddItem(${r.id})" class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 font-bold">+</button></div><div class="space-y-1">${itemsHtml || '<div class="text-center text-xs text-slate-300 italic py-4">Vazio</div>'}</div></div>`;
             });
         }
 
         function renderCircuits() {
             const qdT = document.getElementById('list-qd-terreo'); const qdS = document.getElementById('list-qd-superior'); qdT.innerHTML = ''; qdS.innerHTML = '';
-            let loads = { r:0, s:0, t:0 };
+            let loadsW = { r:0, s:0, t:0 }; let loadsVA = { r:0, s:0, t:0 };
+            const globalPF = Project.settings?.globalPF || 0.92;
+            
             Project.circuits.forEach(c => {
-                let w = 0; Project.rooms.forEach(r => r.items.forEach(i => { if(i.circuitId == c.id) w += (i.power||0); }));
-                if(loads[c.phase] !== undefined) loads[c.phase] += w;
-                let phClass = c.phase === 'r' ? 'phase-r' : (c.phase === 's' ? 'phase-s' : 'phase-t');
-                const html = `<div class="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition group"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg ${phClass} flex items-center justify-center text-xs font-bold shadow-sm uppercase">${c.phase}</div><div><p class="text-sm font-bold text-slate-700 leading-none mb-0.5">${c.name}</p><p class="text-[10px] text-slate-400 font-mono">${w}W • Fio ${c.gauge}mm²</p></div></div><button onclick="window.app.delCirc(${c.id})" class="text-slate-300 hover:text-red-500 p-1.5 opacity-0 group-hover:opacity-100 transition">✕</button></div>`;
+                let va = 0; Project.rooms.forEach(r => r.items.forEach(i => { if(i.circuitId == c.id) va += (i.va || 0); }));
+                const pf = c.pf || globalPF;
+                const watts = va * pf;
+                const finalAmps = c.customAmp > 0 ? c.customAmp : (va / NBR.VOLTAGE); 
+                if(loadsW[c.phase] !== undefined) { loadsW[c.phase] += watts; loadsVA[c.phase] += va; }
+                
+                const html = `<div class="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm group"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white uppercase ${c.phase==='r'?'bg-phase-r':c.phase==='s'?'bg-phase-s':'bg-phase-t'}">${c.phase}</div><div><p class="text-sm font-bold text-slate-700 leading-none">${c.name}</p><p class="text-[10px] text-slate-400 font-mono mt-0.5">${va}VA (FP ${pf}) • ${finalAmps.toFixed(1)}A • ${c.gauge}mm² • ${c.dist||15}m</p></div></div><div class="flex gap-1"><button onclick="window.app.editCircuit(${c.id})" class="bg-slate-100 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded">✏️</button><button onclick="window.app.delCirc(${c.id})" class="text-slate-300 hover:text-red-500 px-2">✕</button></div></div>`;
                 if(c.qd === 'terreo') qdT.innerHTML += html; else qdS.innerHTML += html;
             });
-            document.getElementById('load-r').innerText = loads.r + ' W'; document.getElementById('load-s').innerText = loads.s + ' W'; document.getElementById('load-t').innerText = loads.t + ' W';
-        }
 
-        function getCircuitBadge(id) {
-            const c = Project.circuits.find(x => x.id == id); if(!c) return '';
-            let color = c.phase === 'r' ? 'text-red-500' : (c.phase === 's' ? 'text-slate-800' : 'text-yellow-600');
-            return `<span class="text-[9px] font-bold ${color} bg-slate-50 px-1 rounded border border-slate-100">C${Project.circuits.indexOf(c)+1}</span>`;
+            const totalW = loadsW.r + loadsW.s + loadsW.t;
+            const totalVA = loadsVA.r + loadsVA.s + loadsVA.t;
+            const ampsR = loadsVA.r / 220;
+            const ampsS = loadsVA.s / 220;
+            const ampsT = loadsVA.t / 220;
+            const maxAmp = Math.max(ampsR, ampsS, ampsT);
+
+            let mainBreaker = 40, mainCable = '10.0';
+            if(maxAmp > 32) { mainBreaker = 40; mainCable = '10.0'; }
+            if(maxAmp > 40) { mainBreaker = 50; mainCable = '10.0'; }
+            if(maxAmp > 50) { mainBreaker = 63; mainCable = '16.0'; }
+            if(maxAmp > 63) { mainBreaker = 80; mainCable = '25.0'; }
+            if(maxAmp > 80) { mainBreaker = 100; mainCable = '35.0'; }
+            
+            document.getElementById('gen-breaker').innerText = mainBreaker + ' A';
+            document.getElementById('gen-cable').innerText = mainCable + ' mm²';
+            document.getElementById('gen-dist').innerText = `Dist: ${Project.mainParams?.dist || 20} m`;
+            document.getElementById('gen-load-w').innerText = Math.round(totalW) + ' W';
+            document.getElementById('gen-load-va').innerText = Math.round(totalVA) + ' VA';
+
+            document.getElementById(`load-r-w`).innerText = Math.round(loadsW.r) + ' W'; document.getElementById(`load-r-a`).innerText = ampsR.toFixed(1) + ' A';
+            document.getElementById(`load-s-w`).innerText = Math.round(loadsW.s) + ' W'; document.getElementById(`load-s-a`).innerText = ampsS.toFixed(1) + ' A';
+            document.getElementById(`load-t-w`).innerText = Math.round(loadsW.t) + ' W'; document.getElementById(`load-t-a`).innerText = ampsT.toFixed(1) + ' A';
+            
+            window.calcParams = { mainBreaker, mainCable, maxAmp };
         }
 
         function renderBOM() {
-            const devices = document.getElementById('bom-devices');
-            let counts = { outlet:0, outlet20:0, light:0, switch:0, equipment:0, breaker: Project.circuits.length };
-            Project.rooms.forEach(r => r.items.forEach(i => { if(counts[i.type] !== undefined) counts[i.type]++; }));
-            const row = (icon, name, qtd, color) => `<div class="flex justify-between items-center p-2 border-b border-slate-50 last:border-0"><div class="flex gap-3 items-center"><div class="w-8 h-8 rounded-lg ${color} flex items-center justify-center text-lg">${icon}</div><span class="text-sm font-bold text-slate-600">${name}</span></div><span class="text-lg font-bold text-slate-800">${qtd}</span></div>`;
-            devices.innerHTML = `${row('🔌','Tomada 10A',counts.outlet,'bg-green-50 text-green-600')}${row('🛑','Tomada 20A',counts.outlet20,'bg-red-50 text-red-600')}${row('🔘','Interruptores',counts.switch,'bg-slate-100 text-slate-600')}${row('💡','Luzes',counts.light,'bg-yellow-50 text-yellow-600')}${row('🛡️','Disjuntores',counts.breaker,'bg-blue-50 text-blue-600')}${row('⚡','Quadros',2,'bg-indigo-50 text-indigo-600')}`;
-
-            const cablesEl = document.getElementById('bom-cables'); cablesEl.innerHTML = '';
-            const gauges = {};
-            Project.circuits.forEach(c => {
-                const g = c.gauge; const d = (Number(c.dist) || 15) * 1.2;
-                if(!gauges[g]) gauges[g] = 0; gauges[g] += d;
-            });
-            Object.keys(gauges).sort().forEach(g => {
-                const m = Math.ceil(gauges[g]);
-                cablesEl.innerHTML += `<div class="mb-3 pb-3 border-b border-slate-50 last:border-0"><p class="text-xs font-bold text-slate-500 uppercase mb-2">Bitola ${g}mm²</p><div class="flex gap-2"><div class="flex-1 p-2 rounded bg-white border border-slate-200 flex items-center gap-2 shadow-sm"><div class="w-3 h-3 rounded-full ${g=='2.5'?'bg-red-500':g=='4.0'?'bg-blue-500':'bg-yellow-400'}"></div><div class="flex flex-col"><span class="text-[9px] text-slate-400 font-bold">FASE</span><span class="text-sm font-bold text-slate-700">${m}m</span></div></div><div class="flex-1 p-2 rounded bg-white border border-slate-200 flex items-center gap-2 shadow-sm"><div class="w-3 h-3 rounded-full bg-white border border-slate-300"></div><div class="flex flex-col"><span class="text-[9px] text-slate-400 font-bold">NEUTRO</span><span class="text-sm font-bold text-slate-700">${m}m</span></div></div><div class="flex-1 p-2 rounded bg-white border border-slate-200 flex items-center gap-2 shadow-sm"><div class="w-3 h-3 rounded-full bg-green-500"></div><div class="flex flex-col"><span class="text-[9px] text-slate-400 font-bold">TERRA</span><span class="text-sm font-bold text-slate-700">${m}m</span></div></div></div></div>`;
-            });
-        }
-
-        function renderBudget() {
-            const tb = document.getElementById('budget-tbody'); tb.innerHTML = ''; let total = 0;
-            const count = k => {
-                if(k === 'breaker') return Project.circuits.length; if(k === 'board') return 2;
-                if(k.startsWith('cable')) { const g = k.replace('cable', ''); let m = 0; Project.circuits.forEach(c => { if(c.gauge == g) m += (Number(c.dist)||15)*1.2*3; }); return Math.ceil(m); }
-                return Project.rooms.reduce((acc,r) => acc + r.items.filter(i=>i.type===k).length, 0);
+            const bomItems = document.getElementById('bom-items'); const bomCables = document.getElementById('bom-cables'); const tb = document.getElementById('budget-tbody');
+            let tug = { '1':0, '2':0, '3':0 }; let tue = { '20a':0, 'eqp':0 }; let sw = { '1':0, '2':0, '3':0, '3w':0 }; let lights = 0; let brk = Project.circuits.length;
+            let cableColors = {
+                'r': { name: 'Fase R (Vermelho)', class: 'bg-red-500', items: {} },
+                's': { name: 'Fase S (Preto)', class: 'bg-slate-900', items: {} },
+                't': { name: 'Fase T (Amarelo)', class: 'bg-yellow-400 text-black', items: {} },
+                'n': { name: 'Neutro (Azul)', class: 'bg-blue-500', items: {} },
+                'pe': { name: 'Terra (Verde)', class: 'bg-green-500', items: {} }
             };
-            const labels = { outlet: 'Tomada 10A', outlet20: 'Tomada 20A', light: 'Ponto Luz', switch: 'Interruptor', breaker: 'Disjuntor DIN', board: 'QDC 12/16', 'cable1.5': 'Cabo 1.5mm²', 'cable2.5': 'Cabo 2.5mm²', 'cable4.0': 'Cabo 4.0mm²', 'cable6.0': 'Cabo 6.0mm²', 'cable10.0': 'Cabo 10mm²' };
 
-            Object.keys(Project.prices).forEach(key => {
-                const qtd = count(key);
-                if(qtd > 0) {
-                    const unit = Project.prices[key]; const sub = qtd * unit; total += sub;
-                    tb.innerHTML += `<tr class="hover:bg-slate-50 transition"><td class="p-4 text-slate-700 font-medium sticky left-0 bg-white shadow-[1px_0_0_0_rgba(0,0,0,0.05)]">${labels[key]||key}</td><td class="p-4 text-center text-slate-500 font-bold">${qtd}</td><td class="p-4 text-right"><button onclick="window.app.editPrice('${key}')" class="text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-xs font-bold hover:bg-indigo-100 transition">R$ ${unit.toFixed(2)}</button></td><td class="p-4 text-right font-bold text-slate-800 pr-6">R$ ${sub.toFixed(2)}</td></tr>`;
-                }
+            Project.rooms.forEach(r => r.items.forEach(i => {
+                if(i.type==='outlet') { let m = i.modules || 1; if(tug[m] !== undefined) tug[m]++; }
+                else if(i.type==='outlet20') { tue['20a']++; }
+                else if(i.type==='equipment') { tue['eqp']++; }
+                else if(i.type==='switch') { if(i.isThreeWay) sw['3w']++; else { let m = i.modules || 1; if(sw[m] !== undefined) sw[m]++; } }
+                else if(i.type==='light') lights++;
+            }));
+
+            Project.circuits.forEach(c => {
+                const dist = (Number(c.dist)||15) * 1.1; const g = c.gauge;
+                if(!cableColors[c.phase].items[g]) cableColors[c.phase].items[g] = 0; cableColors[c.phase].items[g] += dist;
+                if(!cableColors['n'].items[g]) cableColors['n'].items[g] = 0; cableColors['n'].items[g] += dist;
+                if(!cableColors['pe'].items[g]) cableColors['pe'].items[g] = 0; cableColors['pe'].items[g] += dist;
+            });
+
+            const mainDist = (Project.mainParams?.dist || 20) * 1.1;
+            const mainGauge = window.calcParams?.mainCable || '10.0';
+            ['r','s','t','n','pe'].forEach(k => { if(!cableColors[k].items[mainGauge]) cableColors[k].items[mainGauge] = 0; cableColors[k].items[mainGauge] += mainDist; });
+
+            bomCables.innerHTML = '';
+            Object.keys(cableColors).forEach(k => {
+                const color = cableColors[k]; const entries = Object.entries(color.items); if(entries.length === 0) return;
+                let listHtml = entries.map(([g, len]) => `<div class="flex justify-between text-xs border-b border-slate-100 py-1 last:border-0"><span class="font-mono text-slate-500">${g}mm²</span><span class="font-bold text-slate-700">${Math.ceil(len)}m</span></div>`).join('');
+                bomCables.innerHTML += `<div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm"><div class="${color.class} px-3 py-2 text-xs font-bold text-white flex justify-between items-center"><span>${color.name}</span><span>🏳️</span></div><div class="p-3 space-y-1">${listHtml}</div></div>`;
+            });
+
+            bomItems.innerHTML = `
+                <div class="bg-white rounded-xl p-4 border border-slate-200">
+                    <h4 class="font-bold text-indigo-800 text-xs uppercase mb-3">Itens Gerais</h4>
+                    <div class="space-y-1.5 text-xs text-slate-600">
+                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>Disjuntor Geral</span><b>${window.calcParams?.mainBreaker}A</b></div>
+                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>Dispositivo DR</span><b>${window.calcParams?.mainBreaker}A</b></div>
+                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>Cabo Entrada</span><b>${window.calcParams?.mainCable}mm</b></div>
+                        <div class="flex justify-between text-slate-400"><span>Distância Geral</span><b>${Project.mainParams?.dist}m</b></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 border border-slate-200">
+                    <h4 class="font-bold text-slate-800 text-xs uppercase mb-3">Interruptores</h4>
+                    <div class="space-y-1.5 text-xs text-slate-600">
+                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>1 Tecla</span><b>${sw[1]}</b></div>
+                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>2 Teclas</span><b>${sw[2]}</b></div>
+                        <div class="flex justify-between pt-1 text-indigo-600 font-bold"><span>3-Way</span><b>${sw['3w']}</b></div>
+                    </div>
+                </div>
+            `;
+
+            tb.innerHTML = ''; let total = 0;
+            const addRow = (label, qty, priceKey) => { if(qty <= 0) return; const price = Project.prices[priceKey] || 0; const sub = qty * price; total += sub; tb.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 text-slate-700 whitespace-nowrap">${label}</td><td class="p-3 text-center font-bold text-slate-500">${qty}</td><td class="p-3 text-right"><button onclick="window.app.editPrice('${priceKey}')" class="text-indigo-600 text-xs font-bold bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">R$ ${price.toFixed(2)}</button></td><td class="p-3 text-right font-bold whitespace-nowrap">R$ ${sub.toFixed(2)}</td></tr>`; };
+
+            addRow(`Disjuntor Geral Tripolar ${window.calcParams?.mainBreaker}A`, 1, 'breakerMain');
+            addRow(`Dispositivo DR Tetrapolar ${window.calcParams?.mainBreaker}A`, 1, 'dr');
+            addRow('Disjuntor DIN Monopolar (Circuitos)', brk, 'breaker');
+            addRow('Quadro Distribuição', 2, 'board');
+            addRow('Tomada (Conj. 1 módulo)', tug[1], 'outlet');
+            addRow('Tomada (Conj. 2 módulos)', tug[2], 'outlet2');
+            addRow('Tomada (Conj. 3 módulos)', tug[3], 'outlet3');
+            addRow('Tomada 20A (Específica)', tue['20a'], 'outlet20');
+            addRow('Saída Fio (Chuveiro/Ar)', tue['eqp'], 'equipment');
+            addRow('Interruptor (1 Tecla)', sw[1], 'switch');
+            addRow('Interruptor (2 Teclas)', sw[2], 'switch2');
+            addRow('Interruptor (3 Teclas)', sw[3], 'switch3');
+            addRow('Interruptor Three-Way', sw['3w'], 'switch3w');
+            addRow('Ponto de Luz', lights, 'light');
+            Object.keys(cableColors).forEach(colorKey => {
+                const colorData = cableColors[colorKey]; const colorName = colorData.name.split(' (')[0]; const colorLabelMap = { 'r': 'Vermelho', 's': 'Preto', 't': 'Amarelo', 'n': 'Azul', 'pe': 'Verde' };
+                Object.entries(colorData.items).forEach(([gauge, length]) => { if (length > 0) addRow(`Cabo ${gauge}mm² ${colorLabelMap[colorKey]} (${colorName})`, Math.ceil(length), `cable${gauge}`); });
             });
             document.getElementById('budget-total').innerText = total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
         }
 
-        // ACTIONS & MODALS
-        const modal = {
-            el: document.getElementById('generic-modal'),
-            open: (title, desc, hasInput, val, cb) => {
-                document.getElementById('g-modal-title').innerText = title;
-                const d = document.getElementById('g-modal-desc'); d.innerText = desc||''; d.classList.toggle('hidden', !desc);
-                const i = document.getElementById('g-modal-input'); i.value = val||''; i.classList.toggle('hidden', !hasInput);
-                modal.el.classList.remove('hidden'); modal.el.classList.add('flex'); if(hasInput) setTimeout(()=>i.focus(), 100);
-                document.getElementById('g-modal-confirm-btn').onclick = () => { if(hasInput && !i.value) return; cb(i.value); modal.close(); };
+        function getCircuitBadge(id) { const c = Project.circuits.find(x => x.id == id); return c ? `<span class="text-[9px] font-bold ${c.phase==='r'?'text-red-500':c.phase==='s'?'text-slate-900':'text-yellow-600'} bg-slate-50 px-1 border rounded ml-1">C${Project.circuits.indexOf(c)+1}</span>` : ''; }
+
+        window.app = {
+            closeModal: () => document.getElementById('generic-modal').classList.add('hidden'),
+            editSettings: () => {
+                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Configurações Globais";
+                document.getElementById('g-modal-content').innerHTML = `<label class="text-xs text-slate-500 block mb-1">Fator de Potência Padrão (NBR)</label><input id="m-pf" type="number" step="0.01" class="w-full border p-2 rounded" value="${Project.settings?.globalPF || 0.92}">`;
+                el.classList.remove('hidden'); el.classList.add('flex');
+                document.getElementById('g-modal-confirm').onclick = () => { Project.settings = { globalPF: Number(document.getElementById('m-pf').value) }; recalcAllTUGs(); saveCloud(); window.app.closeModal(); };
             },
-            close: () => { modal.el.classList.add('hidden'); modal.el.classList.remove('flex'); }
+            editMainParams: () => {
+                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Distância Padrão -> Quadro";
+                 document.getElementById('g-modal-content').innerHTML = `<label class="text-xs text-slate-500 block mb-1">Distância em Metros</label><input id="m-dist" type="number" class="w-full border p-2 rounded" value="${Project.mainParams?.dist || 20}">`;
+                 el.classList.remove('hidden'); el.classList.add('flex');
+                 document.getElementById('g-modal-confirm').onclick = () => { Project.mainParams = { dist: Number(document.getElementById('m-dist').value) }; saveCloud(); window.app.closeModal(); };
+            },
+            promptAddRoom: () => {
+                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Novo Ambiente";
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3"><input id="m-r-name" class="w-full border p-2 rounded text-sm" placeholder="Nome (Ex: Sala)"><select id="m-r-floor" class="w-full border p-2 rounded text-sm bg-white"><option value="terreo">Térreo</option><option value="superior">Superior</option><option value="subsolo">Subsolo</option></select><select id="m-r-type" class="w-full border p-2 rounded text-sm bg-white font-bold text-indigo-700"><option value="living">🛋️ Sala / Quarto (100VA)</option><option value="kitchen">🍳 Cozinha (600VA)</option><option value="bathroom">🚿 Banheiro (600VA)</option><option value="external">🌿 Externo (100VA)</option></select></div>`;
+                el.classList.remove('hidden'); el.classList.add('flex');
+                document.getElementById('g-modal-confirm').onclick = () => { const n = document.getElementById('m-r-name').value; if(n) { Project.rooms.push({id:Date.now(), name:n, floor:document.getElementById('m-r-floor').value, type:document.getElementById('m-r-type').value, items:[]}); saveCloud(); window.app.closeModal(); } };
+            },
+            modalAddItem: (rid) => {
+                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Adicionar Ponto";
+                const circs = Project.circuits.map(c => `<option value="${c.id}">${c.name} (${c.phase.toUpperCase()})</option>`).join('');
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><div class="grid grid-cols-2 gap-2"><select id="m-i-type" class="border p-2 rounded bg-white" onchange="toggleFields()"><option value="outlet">🔌 Tomada TUG</option><option value="outlet20">🛑 Tomada 20A</option><option value="switch">🔘 Interruptor</option><option value="light">💡 Iluminação</option><option value="equipment">❄️ Ar/Chuveiro</option></select><input id="m-i-name" class="border p-2 rounded" placeholder="Nome"></div><div id="div-modules" class="grid grid-cols-2 gap-2"><select id="m-i-mod" class="border p-2 rounded bg-white"><option value="1">1 Seção</option><option value="2">2 Seções</option><option value="3">3 Seções</option></select><label class="flex items-center gap-2 border p-2 rounded bg-slate-50"><input type="checkbox" id="m-i-3w"> Three-Way</label></div><div id="div-power"><input id="m-i-va" type="number" class="w-full border p-2 rounded" placeholder="Potência (VA)"><p class="text-[10px] text-slate-400 mt-1">Vazio = Auto NBR</p></div><select id="m-i-circ" class="w-full border p-2 rounded bg-white"><option value="">Sem Circuito</option>${circs}</select></div><script>function toggleFields(){const t=document.getElementById('m-i-type').value; const m=document.getElementById('div-modules'); if(t==='outlet'||t==='switch') m.classList.remove('hidden'); else m.classList.add('hidden');}<\/script>`;
+                el.classList.remove('hidden'); el.classList.add('flex');
+                document.getElementById('g-modal-confirm').onclick = () => {
+                    const type = document.getElementById('m-i-type').value; let va = Number(document.getElementById('m-i-va').value); const r = Project.rooms.find(x => x.id === rid); let customVA = va > 0 ? va : 0;
+                    if(type === 'outlet' && !va) { const tempIdx = r.items.filter(i => i.type === 'outlet').length; const rule = NBR.TUG_RULES[r.type] || NBR.TUG_RULES.living; if(rule.limit > 0) va = (tempIdx < rule.limit) ? rule.base : (rule.extra||100); else va = rule.base; } if(!va) va = (type === 'light') ? 100 : 0;
+                    r.items.push({ id: Date.now(), type, name: document.getElementById('m-i-name').value || 'Ponto', va, power: Math.round(va*0.92), customVA, modules: Number(document.getElementById('m-i-mod').value)||1, isThreeWay: document.getElementById('m-i-3w').checked, circuitId: document.getElementById('m-i-circ').value });
+                    recalcAllTUGs(); saveCloud(); window.app.closeModal();
+                };
+            },
+            editItem: (rid, iid) => {
+                const r = Project.rooms.find(x => x.id === rid); if(!r) return; const i = r.items.find(x => x.id === iid); if(!i) return;
+                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Item";
+                const circs = Project.circuits.map(c => `<option value="${c.id}" ${c.id==i.circuitId?'selected':''}>${c.name} (${c.phase.toUpperCase()})</option>`).join('');
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="ei-name" class="w-full border p-2 rounded" value="${i.name}"><div class="grid grid-cols-2 gap-2"><input id="ei-va" type="number" class="border p-2 rounded" value="${i.va}" placeholder="Potência VA"><select id="ei-circ" class="border p-2 rounded bg-white">${circs}</select></div></div>`;
+                el.classList.remove('hidden'); el.classList.add('flex');
+                document.getElementById('g-modal-confirm').onclick = () => { i.name = document.getElementById('ei-name').value; i.va = Number(document.getElementById('ei-va').value); i.customVA = i.va; i.power = Math.round(i.va * (Project.settings?.globalPF||0.92)); i.circuitId = document.getElementById('ei-circ').value; saveCloud(); window.app.closeModal(); };
+            },
+            editCircuit: (cid) => {
+                const c = Project.circuits.find(x => x.id === cid); if(!c) return;
+                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = `Ajustar Circuito`;
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="ec-name" class="w-full border p-2 rounded" value="${c.name}"><div class="grid grid-cols-2 gap-2"><select id="ec-qd" class="w-full border p-2 rounded bg-white"><option value="terreo" ${c.qd=='terreo'?'selected':''}>Térreo</option><option value="superior" ${c.qd=='superior'?'selected':''}>Superior</option></select><select id="ec-phase" class="w-full border p-2 rounded bg-white"><option value="r" ${c.phase=='r'?'selected':''}>Fase R (Verm)</option><option value="s" ${c.phase=='s'?'selected':''}>Fase S (Preto)</option><option value="t" ${c.phase=='t'?'selected':''}>Fase T (Amar)</option></select></div><div class="grid grid-cols-2 gap-2"><select id="ec-gauge" class="w-full border p-2 rounded bg-white"><option value="1.5" ${c.gauge=='1.5'?'selected':''}>1.5mm</option><option value="2.5" ${c.gauge=='2.5'?'selected':''}>2.5mm</option><option value="4.0" ${c.gauge=='4.0'?'selected':''}>4.0mm</option><option value="6.0" ${c.gauge=='6.0'?'selected':''}>6.0mm</option><option value="10.0" ${c.gauge=='10.0'?'selected':''}>10mm</option></select><input id="ec-dist" type="number" class="w-full border p-2 rounded" value="${c.dist || 15}" placeholder="Dist. (m)"></div><input id="ec-amp" type="number" class="w-full border p-2 rounded border-yellow-300 bg-yellow-50" value="${c.customAmp || 0}" placeholder="Corrente Fixa (Opcional)"></div>`;
+                el.classList.remove('hidden'); el.classList.add('flex');
+                document.getElementById('g-modal-confirm').onclick = () => { c.name = document.getElementById('ec-name').value; c.qd = document.getElementById('ec-qd').value; c.phase = document.getElementById('ec-phase').value; c.gauge = document.getElementById('ec-gauge').value; c.customAmp = parseFloat(document.getElementById('ec-amp').value) || 0; c.dist = parseFloat(document.getElementById('ec-dist').value) || 15; saveCloud(); window.app.closeModal(); };
+            },
+            promptAddCircuit: () => {
+                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Novo Circuito";
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="c-name" class="w-full border p-2 rounded" placeholder="Nome"><div class="grid grid-cols-2 gap-2"><select id="c-qd" class="border p-2 rounded bg-white"><option value="terreo">Térreo</option><option value="superior">Superior</option></select><select id="c-phase" class="border p-2 rounded bg-white font-bold"><option value="r">Fase R</option><option value="s">Fase S</option><option value="t">Fase T</option></select></div><select id="c-gauge" class="w-full border p-2 rounded bg-white"><option value="1.5">1.5mm</option><option value="2.5">2.5mm</option><option value="4.0">4.0mm</option></select></div>`;
+                el.classList.remove('hidden'); el.classList.add('flex');
+                document.getElementById('g-modal-confirm').onclick = () => { Project.circuits.push({ id: Date.now(), name: document.getElementById('c-name').value, qd: document.getElementById('c-qd').value, phase: document.getElementById('c-phase').value, gauge: document.getElementById('c-gauge').value, dist: 15, customAmp: 0, pf: 0.92, usage: 'power' }); saveCloud(); window.app.closeModal(); };
+            },
+            editPrice: (k) => {
+                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Preço";
+                 document.getElementById('g-modal-content').innerHTML = `<input id="m-price" type="number" class="w-full border p-2 rounded" step="0.01" value="${Project.prices[k]}">`;
+                 el.classList.remove('hidden'); el.classList.add('flex');
+                 document.getElementById('g-modal-confirm').onclick = () => { Project.prices[k] = Number(document.getElementById('m-price').value); saveCloud(); window.app.closeModal(); };
+            },
+            delItem: (rid, iid) => { const r = Project.rooms.find(x => x.id === rid); if(r){ r.items = r.items.filter(i => i.id !== iid); recalcAllTUGs(); saveCloud(); } },
+            delRoom: (id) => { Project.rooms = Project.rooms.filter(x => x.id !== id); saveCloud(); },
+            delCirc: (id) => { Project.circuits = Project.circuits.filter(x => x.id !== id); saveCloud(); },
+            filterFloor: (f, btn) => { currentFloorFilter = f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderRooms(); },
+            setTab: (id) => { document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); document.getElementById('tab-'+id).classList.add('active'); document.querySelectorAll('#nav-'+id+', #mob-'+id).forEach(b=>b.classList.add('text-indigo-600')); },
+            switchAuthMode: m => { document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+m).classList.add('active'); document.getElementById('btn-auth-action').innerText = m==='login'?'ACESSAR PROJETO':'CRIAR CONTA'; },
+            handleAuthAction: async () => {
+                const e = document.getElementById('auth-email').value; const p = document.getElementById('auth-pass').value; const btn = document.getElementById('btn-auth-action'); const errorDiv = document.getElementById('auth-error');
+                if(!e || !p) { btn.classList.add('shake'); setTimeout(() => btn.classList.remove('shake'), 500); errorDiv.innerText = "Preencha e-mail e senha!"; errorDiv.classList.remove('hidden'); return; }
+                btn.innerText = "Carregando..."; btn.disabled = true; errorDiv.classList.add('hidden');
+                try { if(document.getElementById('tab-login').classList.contains('active')) await signInWithEmailAndPassword(AUTH, e, p); else await createUserWithEmailAndPassword(AUTH, e, p); } catch(err) { btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; errorDiv.classList.remove('hidden'); errorDiv.innerText = err.code.includes('password') ? "Senha incorreta" : "Erro: " + err.code; }
+            },
+            handleLogout: () => signOut(AUTH).then(()=>location.reload())
         };
-
-        window.app.promptAddRoom = () => modal.open("Novo Cômodo", "Nome do ambiente:", true, "", v => { Project.rooms.push({ id: Date.now(), name: v, floor: currentFloorFilter==='all'?'terreo':currentFloorFilter, items: [] }); saveCloud(); });
-        window.app.delRoom = (id) => modal.open("Excluir?", "Apagará tudo no cômodo.", false, null, () => { Project.rooms = Project.rooms.filter(r => r.id !== id); saveCloud(); });
-        window.app.promptAddCircuit = () => { document.getElementById('circuit-modal').classList.remove('hidden'); document.getElementById('circuit-modal').classList.add('flex'); document.getElementById('c-save-btn').onclick = () => { const n = document.getElementById('c-name').value; if(n) { Project.circuits.push({ id: Date.now(), name: n, qd: document.getElementById('c-qd').value, phase: document.getElementById('c-phase').value, gauge: document.getElementById('c-gauge').value, dist: Number(document.getElementById('c-dist').value) }); saveCloud(); document.getElementById('circuit-modal').classList.add('hidden'); } } };
-        window.app.delCirc = (id) => modal.open("Apagar Circuito?", null, false, null, () => { Project.circuits = Project.circuits.filter(c => c.id !== id); saveCloud(); });
-        window.app.addItem = (rid) => {
-            const m = document.getElementById('item-modal'); m.classList.remove('hidden'); m.classList.add('flex');
-            const sel = document.getElementById('i-circ'); sel.innerHTML = '<option value="">-- Selecione --</option>' + Project.circuits.map(c => `<option value="${c.id}">${c.name} (${c.phase.toUpperCase()})</option>`).join('');
-            document.getElementById('item-save-btn').onclick = () => {
-                const n = document.getElementById('i-name').value; if(n) { const r = Project.rooms.find(x => x.id === rid); if(r) { r.items.push({ id: Date.now(), type: document.getElementById('i-type').value, name: n, power: Number(document.getElementById('i-watt').value), circuitId: document.getElementById('i-circ').value }); saveCloud(); window.app.closeItemModal(); } }
-            };
-        };
-        window.app.closeItemModal = () => { document.getElementById('item-modal').classList.add('hidden'); document.getElementById('item-modal').classList.remove('flex'); };
-        window.app.delItem = (rid, iid) => modal.open("Remover Ponto?", null, false, null, () => { const r = Project.rooms.find(x => x.id === rid); if(r) { r.items = r.items.filter(i => i.id !== iid); saveCloud(); } });
-        window.app.editPrice = (k) => modal.open("Editar Preço", null, true, Project.prices[k], v => { Project.prices[k] = parseFloat(v); saveCloud(); });
-        window.app.confirmReset = () => modal.open("Resetar Tudo?", "Isso apaga suas alterações.", false, null, () => { Project = JSON.parse(JSON.stringify(defaultData)); saveCloud(true); });
-        window.app.closeModal = modal.close;
-
     </script>
 </body>
 </html>
