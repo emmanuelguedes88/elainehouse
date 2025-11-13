@@ -74,7 +74,7 @@
         <header class="bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-sm z-20 sticky top-0">
             <div class="flex items-center gap-3">
                 <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-md"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12H11l2-8z"/></svg></div>
-                <div><h1 class="font-bold text-lg text-slate-800 leading-none fun-font">Dimensionamento</h1><p class="text-[10px] font-bold text-indigo-600 uppercase mt-0.5">Precisão NBR 5410</p></div>
+                <div><h1 class="font-bold text-lg text-slate-800 leading-none fun-font">Dimensionamento</h1><p class="text-[10px] font-bold text-indigo-600 uppercase mt-0.5">Fator Demanda Ativo</p></div>
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="window.app.editSettings()" class="hidden md:flex bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold items-center gap-1 hover:bg-slate-200">⚙️ Config</button>
@@ -116,7 +116,7 @@
                             <p class="text-slate-400 text-xs">Disjuntor e Cabos de Entrada.</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="window.app.editSettings()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">⚙️ Config FP</button>
+                            <button onclick="window.app.editSettings()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">⚙️ Config</button>
                             <button onclick="window.app.editMainParams()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">📏 Distância</button>
                         </div>
                     </div>
@@ -125,6 +125,7 @@
                         <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
                             <p class="text-[10px] text-slate-400 uppercase font-bold">Disjuntor Geral</p>
                             <p id="gen-breaker" class="text-2xl font-bold text-white">-- A</p>
+                            <p id="gen-demand-factor" class="text-[9px] text-slate-500">Demanda: --%</p>
                         </div>
                         <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
                             <p class="text-[10px] text-slate-400 uppercase font-bold">Cabo Entrada</p>
@@ -132,21 +133,21 @@
                             <p id="gen-dist" class="text-[9px] text-slate-500">Dist: -- m</p>
                         </div>
                         <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold">Potência Ativa</p>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">Carga Demandada</p>
+                            <p id="gen-load-va-demand" class="text-xl font-bold text-blue-300">-- VA</p>
+                             <p id="gen-load-va-total" class="text-[9px] text-slate-500">Total: -- VA</p>
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">Carga Ativa (W)</p>
                             <p id="gen-load-w" class="text-xl font-bold text-yellow-400">-- W</p>
                             <p class="text-[9px] text-slate-500">Uso Real (Energia)</p>
-                        </div>
-                         <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold">Potência Aparente</p>
-                            <p id="gen-load-va" class="text-xl font-bold text-blue-300">-- VA</p>
-                             <p class="text-[9px] text-slate-500">Dimensionamento</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- EQUILIBRIO -->
                 <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wide">Balanceamento (Ativo)</h3>
+                    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wide">Balanceamento (Carga Total)</h3>
                     <button onclick="window.app.promptAddCircuit()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-indigo-700">+ Circuito</button>
                 </div>
                 <div class="grid grid-cols-3 gap-3 mb-6">
@@ -232,40 +233,66 @@
 
         const app = initializeApp(firebaseConfig); const AUTH = getAuth(app); const db = getFirestore(app);
 
+        // ### V14 - NOVO FATOR DE DEMANDA ###
         const defaultData = {
-            settings: { globalPF: 0.92 },
+            settings: { 
+                globalPF: 0.92,
+                demandFactor: 0.7 // FATOR DE DEMANDA DE 70%
+            },
             mainParams: { dist: 20 },
             rooms: [
                 { id: 1, name: "Garagem (Subsolo)", floor: "subsolo", type: "external", items: [] },
                 { id: 2, name: "Sala Estar/Jantar", floor: "terreo", type: "living", items: [] },
-                { id: 3, name: "Cozinha", floor: "terreo", type: "kitchen", items: [] },
+                { id: 3, name: "Cozinha", floor: "terreo", type: "kitchen", items: [
+                    { id: 3001, type: 'equipment', name: 'Lava-Louças', va: 2600, pf: 0.92, circuitId: 501 }, // 2400W / 0.92
+                    { id: 3002, type: 'equipment', name: 'Cooktop Elétrico', va: 7000, pf: 1.0, circuitId: 502 }  // 7000W
+                ]},
                 { id: 4, name: "Terraço Gourmet", floor: "terreo", type: "kitchen", items: [] },
-                { id: 5, name: "Área de Serviço", floor: "terreo", type: "kitchen", items: [] },
+                { id: 5, name: "Área de Serviço", floor: "terreo", type: "kitchen", items: [
+                    { id: 5001, type: 'equipment', name: 'Máquina Lavar', va: 2700, pf: 0.92, circuitId: 503 } // 2500W / 0.92
+                ]},
                 { id: 6, name: "Depósito", floor: "terreo", type: "living", items: [] },
-                { id: 7, name: "Quarto 01 (Térreo)", floor: "terreo", type: "living", items: [{ id: 701, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 401 }] },
-                { id: 8, name: "WCB 01 Social", floor: "terreo", type: "bathroom", items: [{ id: 801, type: 'equipment', name: 'Chuveiro 7500W', va: 7500, pf: 1.0, circuitId: 301 }] },
-                { id: 9, name: "Suíte Master", floor: "superior", type: "living", items: [{ id: 901, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 402 }] },
+                { id: 7, name: "Quarto 01 (Térreo)", floor: "terreo", type: "living", items: [
+                    { id: 701, type: 'equipment', name: 'Ar Condicionado', va: 1400, pf: 0.92, circuitId: 401 } // 12000 BTU
+                ]},
+                { id: 8, name: "WCB 01 Social", floor: "terreo", type: "bathroom", items: [
+                    { id: 801, type: 'equipment', name: 'Chuveiro 7000W', va: 7000, pf: 1.0, circuitId: 301 }
+                ]},
+                { id: 9, name: "Suíte Master", floor: "superior", type: "living", items: [
+                    { id: 901, type: 'equipment', name: 'Ar Condicionado', va: 1400, pf: 0.92, circuitId: 402 }
+                ]},
                 { id: 10, name: "Closet Master", floor: "superior", type: "living", items: [] },
-                { id: 11, name: "WCB Suíte", floor: "superior", type: "bathroom", items: [{ id: 1101, type: 'equipment', name: 'Chuveiro 7500W', va: 7500, pf: 1.0, circuitId: 302 }] },
-                { id: 12, name: "Escritório", floor: "superior", type: "living", items: [{ id: 1201, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 403 }] },
-                { id: 13, name: "Quarto 02", floor: "superior", type: "living", items: [{ id: 1301, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 404 }] },
-                { id: 14, name: "Quarto 03", floor: "superior", type: "living", items: [{ id: 1401, type: 'equipment', name: 'Ar Condicionado', va: 1500, pf: 0.92, circuitId: 405 }] },
-                { id: 15, name: "WCB 03 Social", floor: "superior", type: "bathroom", items: [{ id: 1501, type: 'equipment', name: 'Chuveiro 7500W', va: 7500, pf: 1.0, circuitId: 303 }] },
+                { id: 11, name: "WCB Suíte", floor: "superior", type: "bathroom", items: [
+                    { id: 1101, type: 'equipment', name: 'Chuveiro 7000W', va: 7000, pf: 1.0, circuitId: 302 }
+                ]},
+                { id: 12, name: "Escritório", floor: "superior", type: "living", items: [
+                    { id: 1201, type: 'equipment', name: 'Ar Condicionado', va: 1400, pf: 0.92, circuitId: 403 }
+                ]},
+                { id: 13, name: "Quarto 02", floor: "superior", type: "living", items: [
+                    { id: 1301, type: 'equipment', name: 'Ar Condicionado', va: 1400, pf: 0.92, circuitId: 404 }
+                ]},
+                { id: 14, name: "Quarto 03", floor: "superior", type: "living", items: [
+                    { id: 1401, type: 'equipment', name: 'Ar Condicionado', va: 1400, pf: 0.92, circuitId: 405 }
+                ]},
+                { id: 15, name: "WCB 03 Social", floor: "superior", type: "bathroom", items: [
+                    { id: 1501, type: 'equipment', name: 'Chuveiro 7000W', va: 7000, pf: 1.0, circuitId: 303 }
+                ]},
                 { id: 16, name: "Circulação", floor: "superior", type: "living", items: [] }
             ],
             circuits: [
                 { id: 1, name: "Iluminação Térreo", qd: "terreo", phase: "r", gauge: "1.5", usage: "lighting", dist: 20, pf: 1.0 },
-                { id: 2, name: "TUGs Cozinha", qd: "terreo", phase: "s", gauge: "4.0", usage: "power", dist: 15, pf: 0.92 },
-                // Chuveiros 7500W
-                { id: 301, name: "Chuveiro WCB 01", qd: "terreo", phase: "t", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 35 },
-                { id: 302, name: "Chuveiro Suíte", qd: "superior", phase: "r", gauge: "6.0", usage: "specific", dist: 10, pf: 1.0, customAmp: 35 },
-                { id: 303, name: "Chuveiro WCB 03", qd: "superior", phase: "s", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 35 },
-                // Ar Condicionados
+                { id: 2, name: "TUGs Cozinha", qd: "terreo", phase: "s", gauge: "2.5", usage: "power", dist: 15, pf: 0.92 },
+                { id: 301, name: "Chuveiro WCB 01", qd: "terreo", phase: "t", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 40 },
+                { id: 302, name: "Chuveiro Suíte", qd: "superior", phase: "r", gauge: "6.0", usage: "specific", dist: 10, pf: 1.0, customAmp: 40 },
+                { id: 303, name: "Chuveiro WCB 03", qd: "superior", phase: "s", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 40 },
                 { id: 401, name: "AC Quarto 01", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 15, pf: 0.92 },
                 { id: 402, name: "AC Suíte", qd: "superior", phase: "t", gauge: "2.5", usage: "specific", dist: 10, pf: 0.92 },
                 { id: 403, name: "AC Escritório", qd: "superior", phase: "t", gauge: "2.5", usage: "specific", dist: 12, pf: 0.92 },
                 { id: 404, name: "AC Quarto 02", qd: "superior", phase: "r", gauge: "2.5", usage: "specific", dist: 15, pf: 0.92 },
-                { id: 405, name: "AC Quarto 03", qd: "superior", phase: "s", gauge: "2.5", usage: "specific", dist: 18, pf: 0.92 }
+                { id: 405, name: "AC Quarto 03", qd: "superior", phase: "s", gauge: "2.5", usage: "specific", dist: 18, pf: 0.92 },
+                { id: 501, name: "TUE Lava-Louças", qd: "terreo", phase: "s", gauge: "2.5", usage: "specific", dist: 15, pf: 0.92 },
+                { id: 502, name: "TUE Cooktop", qd: "terreo", phase: "t", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 40 },
+                { id: 503, name: "TUE Lava-Roupas", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 18, pf: 0.92 }
             ],
             prices: { 
                 outlet: 14.50, outlet2: 22.00, outlet3: 29.90, outlet20: 18.90, equipment: 0,
@@ -287,15 +314,23 @@
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('app-interface').classList.remove('hidden'); document.getElementById('app-interface').classList.add('flex');
                 document.getElementById('mobile-menu').classList.remove('hidden'); document.getElementById('mobile-menu').classList.add('flex');
-                DB_REF = doc(db, `users/${u.uid}/data/project_elaine_final_v12`);
+                DB_REF = doc(db, `users/${u.uid}/data/project_elaine_final_v14`);
                 onSnapshot(DB_REF, s => { 
                     if(s.exists()) { 
                         Project = s.data(); 
                         if(!Project.prices) Project.prices = defaultData.prices;
                         if(!Project.mainParams) Project.mainParams = defaultData.mainParams;
                         if(!Project.settings) Project.settings = defaultData.settings;
+                        if(Project.settings.demandFactor === undefined) Project.settings.demandFactor = 0.7; // Adiciona Fator Demanda
                         Object.keys(defaultData.prices).forEach(k => { if(Project.prices[k] === undefined) Project.prices[k] = defaultData.prices[k]; });
-                        defaultData.rooms.forEach(dr => { if(!Project.rooms.find(r => r.id === dr.id)) Project.rooms.push(dr); });
+                        defaultData.rooms.forEach(defaultRoom => {
+                            const projectRoom = Project.rooms.find(r => r.id === defaultRoom.id);
+                            if (projectRoom) {
+                                defaultRoom.items.forEach(defaultItem => {
+                                    if (defaultItem.type === 'equipment' && !projectRoom.items.find(i => i.name === defaultItem.name)) { projectRoom.items.push(defaultItem); }
+                                });
+                            } else { Project.rooms.push(defaultRoom); }
+                        });
                         defaultData.circuits.forEach(dc => { if(!Project.circuits.find(c => c.id === dc.id)) Project.circuits.push(dc); });
                         recalcAllTUGs(); renderAll(); 
                     } else saveCloud(true); 
@@ -326,7 +361,14 @@
             filtered.forEach(r => {
                 const itemsHtml = r.items.map(i => {
                      let detail = ''; if(i.type==='outlet' || i.type==='switch') detail = `${i.modules||1} Seções`; if(i.isThreeWay) detail = 'Three-Way';
-                     return `<div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 group"><div class="flex items-center gap-2"><div class="text-lg">${i.type==='light'?'💡':i.type==='outlet'?'🔌':i.type==='outlet20'?'🛑':i.type==='switch'?'🔘':'❄️'}</div><div><div class="flex items-center gap-1"><p class="text-xs font-bold text-slate-700 leading-none">${i.name}</p>${getCircuitBadge(i.circuitId)}</div><div class="flex items-center gap-1 mt-0.5"><button onclick="window.app.editItem(${r.id}, ${i.id})" class="text-[9px] font-mono text-indigo-600 bg-indigo-50 px-1 rounded hover:bg-indigo-100">${i.va || '?'}VA ${detail} ✏️</button></div></div></div><button onclick="window.app.delItem(${r.id}, ${i.id})" class="text-slate-300 hover:text-red-500 p-1">✕</button></div>`;
+                     let icon = '💡';
+                     switch(i.type) {
+                        case 'outlet': icon = '🔌'; break;
+                        case 'outlet20': icon = '🛑'; break;
+                        case 'switch': icon = '🔘'; break;
+                        case 'equipment': icon = (i.name.includes('Chuveiro') ? '🚿' : (i.name.includes('Cooktop') ? '🔥' : '❄️') ); break;
+                     }
+                     return `<div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 group"><div class="flex items-center gap-2"><div class="text-lg">${icon}</div><div><div class="flex items-center gap-1"><p class="text-xs font-bold text-slate-700 leading-none">${i.name}</p>${getCircuitBadge(i.circuitId)}</div><div class="flex items-center gap-1 mt-0.5"><button onclick="window.app.editItem(${r.id}, ${i.id})" class="text-[9px] font-mono text-indigo-600 bg-indigo-50 px-1 rounded hover:bg-indigo-100">${i.va || '?'}VA ${detail} ✏️</button></div></div></div><button onclick="window.app.delItem(${r.id}, ${i.id})" class="text-slate-300 hover:text-red-500 p-1">✕</button></div>`;
                 }).join('');
                 grid.innerHTML += `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 card-hover relative"><div class="flex justify-between items-start mb-2"><div><span class="text-[9px] uppercase font-bold tracking-wider bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${r.floor}</span><h3 class="font-bold text-lg text-slate-800 fun-font">${r.name}</h3></div><button onclick="window.app.modalAddItem(${r.id})" class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 font-bold">+</button></div><div class="space-y-1">${itemsHtml || '<div class="text-center text-xs text-slate-300 italic py-4">Vazio</div>'}</div></div>`;
             });
@@ -339,7 +381,7 @@
             
             Project.circuits.forEach(c => {
                 let va = 0; Project.rooms.forEach(r => r.items.forEach(i => { if(i.circuitId == c.id) va += (i.va || 0); }));
-                const pf = c.pf || globalPF;
+                const pf = c.pf || (c.usage === 'lighting' ? 1.0 : globalPF);
                 const watts = va * pf;
                 const finalAmps = c.customAmp > 0 ? c.customAmp : (va / NBR.VOLTAGE); 
                 if(loadsW[c.phase] !== undefined) { loadsW[c.phase] += watts; loadsVA[c.phase] += va; }
@@ -348,31 +390,37 @@
                 if(c.qd === 'terreo') qdT.innerHTML += html; else qdS.innerHTML += html;
             });
 
+            // ### V14 - NOVO CÁLCULO GERAL COM FATOR DE DEMANDA ###
             const totalW = loadsW.r + loadsW.s + loadsW.t;
             const totalVA = loadsVA.r + loadsVA.s + loadsVA.t;
             const ampsR = loadsVA.r / 220;
             const ampsS = loadsVA.s / 220;
             const ampsT = loadsVA.t / 220;
-            const maxAmp = Math.max(ampsR, ampsS, ampsT);
+            const maxAmpTotal = Math.max(ampsR, ampsS, ampsT); // Corrente 100%
+
+            const demandFactor = Project.settings?.demandFactor || 0.7;
+            const maxAmpDemandada = maxAmpTotal * demandFactor; // Corrente com demanda
 
             let mainBreaker = 40, mainCable = '10.0';
-            if(maxAmp > 32) { mainBreaker = 40; mainCable = '10.0'; }
-            if(maxAmp > 40) { mainBreaker = 50; mainCable = '10.0'; }
-            if(maxAmp > 50) { mainBreaker = 63; mainCable = '16.0'; }
-            if(maxAmp > 63) { mainBreaker = 80; mainCable = '25.0'; }
-            if(maxAmp > 80) { mainBreaker = 100; mainCable = '35.0'; }
+            if(maxAmpDemandada > 32) { mainBreaker = 40; mainCable = '10.0'; }
+            if(maxAmpDemandada > 40) { mainBreaker = 50; mainCable = '10.0'; }
+            if(maxAmpDemandada > 50) { mainBreaker = 63; mainCable = '16.0'; }
+            if(maxAmpDemandada > 63) { mainBreaker = 80; mainCable = '25.0'; }
+            if(maxAmpDemandada > 80) { mainBreaker = 100; mainCable = '35.0'; }
             
             document.getElementById('gen-breaker').innerText = mainBreaker + ' A';
+            document.getElementById('gen-demand-factor').innerText = `Demanda: ${Math.round(demandFactor*100)}%`;
             document.getElementById('gen-cable').innerText = mainCable + ' mm²';
             document.getElementById('gen-dist').innerText = `Dist: ${Project.mainParams?.dist || 20} m`;
             document.getElementById('gen-load-w').innerText = Math.round(totalW) + ' W';
-            document.getElementById('gen-load-va').innerText = Math.round(totalVA) + ' VA';
+            document.getElementById('gen-load-va-demand').innerText = Math.round(totalVA * demandFactor) + ' VA';
+            document.getElementById('gen-load-va-total').innerText = `Total: ${Math.round(totalVA)} VA`;
 
             document.getElementById(`load-r-w`).innerText = Math.round(loadsW.r) + ' W'; document.getElementById(`load-r-a`).innerText = ampsR.toFixed(1) + ' A';
             document.getElementById(`load-s-w`).innerText = Math.round(loadsW.s) + ' W'; document.getElementById(`load-s-a`).innerText = ampsS.toFixed(1) + ' A';
             document.getElementById(`load-t-w`).innerText = Math.round(loadsW.t) + ' W'; document.getElementById(`load-t-a`).innerText = ampsT.toFixed(1) + ' A';
             
-            window.calcParams = { mainBreaker, mainCable, maxAmp };
+            window.calcParams = { mainBreaker, mainCable, maxAmp: maxAmpDemandada }; // Usa corrente de demanda
         }
 
         function renderBOM() {
@@ -443,7 +491,7 @@
             addRow('Tomada (Conj. 2 módulos)', tug[2], 'outlet2');
             addRow('Tomada (Conj. 3 módulos)', tug[3], 'outlet3');
             addRow('Tomada 20A (Específica)', tue['20a'], 'outlet20');
-            addRow('Saída Fio (Chuveiro/Ar)', tue['eqp'], 'equipment');
+            addRow('Saída Fio (Chuveiro/Ar/Etc)', tue['eqp'], 'equipment');
             addRow('Interruptor (1 Tecla)', sw[1], 'switch');
             addRow('Interruptor (2 Teclas)', sw[2], 'switch2');
             addRow('Interruptor (3 Teclas)', sw[3], 'switch3');
@@ -460,11 +508,23 @@
 
         window.app = {
             closeModal: () => document.getElementById('generic-modal').classList.add('hidden'),
+            // ### V14 - NOVO MODAL DE CONFIG ###
             editSettings: () => {
                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Configurações Globais";
-                document.getElementById('g-modal-content').innerHTML = `<label class="text-xs text-slate-500 block mb-1">Fator de Potência Padrão (NBR)</label><input id="m-pf" type="number" step="0.01" class="w-full border p-2 rounded" value="${Project.settings?.globalPF || 0.92}">`;
+                document.getElementById('g-modal-content').innerHTML = `
+                <label class="text-xs text-slate-500 block mb-1">Fator de Potência Padrão (FP)</label>
+                <input id="m-pf" type="number" step="0.01" class="w-full border p-2 rounded mb-3" value="${Project.settings?.globalPF || 0.92}">
+                <label class="text-xs text-slate-500 block mb-1">Fator de Demanda Total (FD) em %</label>
+                <input id="m-fd" type="number" step="1" class="w-full border p-2 rounded" value="${(Project.settings?.demandFactor || 0.7) * 100}">
+                <p class="text-[10px] text-slate-400 mt-1">Valor (Ex: 70) para 70%. Usado no Disjuntor Geral.</p>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
-                document.getElementById('g-modal-confirm').onclick = () => { Project.settings = { globalPF: Number(document.getElementById('m-pf').value) }; recalcAllTUGs(); saveCloud(); window.app.closeModal(); };
+                document.getElementById('g-modal-confirm').onclick = () => { 
+                    Project.settings = { 
+                        globalPF: Number(document.getElementById('m-pf').value),
+                        demandFactor: (Number(document.getElementById('m-fd').value) || 70) / 100
+                    }; 
+                    recalcAllTUGs(); saveCloud(); window.app.closeModal(); 
+                };
             },
             editMainParams: () => {
                  const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Distância Padrão -> Quadro";
@@ -474,19 +534,38 @@
             },
             promptAddRoom: () => {
                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Novo Ambiente";
-                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3"><input id="m-r-name" class="w-full border p-2 rounded text-sm" placeholder="Nome (Ex: Sala)"><select id="m-r-floor" class="w-full border p-2 rounded text-sm bg-white"><option value="terreo">Térreo</option><option value="superior">Superior</option><option value="subsolo">Subsolo</option></select><select id="m-r-type" class="w-full border p-2 rounded text-sm bg-white font-bold text-indigo-700"><option value="living">🛋️ Sala / Quarto (100VA)</option><option value="kitchen">🍳 Cozinha (600VA)</option><option value="bathroom">🚿 Banheiro (600VA)</option><option value="external">🌿 Externo (100VA)</option></select></div>`;
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3">
+                    <input id="m-r-name" class="w-full border p-2 rounded text-sm" placeholder="Nome (Ex: Sala)">
+                    <select id="m-r-floor" class="w-full border p-2 rounded text-sm bg-white"><option value="terreo">Térreo</option><option value="superior">Superior</option><option value="subsolo">Subsolo</option></select>
+                    <select id="m-r-type" class="w-full border p-2 rounded text-sm bg-white font-bold text-indigo-700"><option value="living">🛋️ Sala / Quarto (100VA)</option><option value="kitchen">🍳 Cozinha (600VA)</option><option value="bathroom">🚿 Banheiro (600VA)</option><option value="external">🌿 Externo (100VA)</option></select>
+                    <input id="m-r-tugs" type="number" class="w-full border p-2 rounded text-sm" placeholder="Quantas TUGs (Uso Geral)?">
+                </div>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
-                document.getElementById('g-modal-confirm').onclick = () => { const n = document.getElementById('m-r-name').value; if(n) { Project.rooms.push({id:Date.now(), name:n, floor:document.getElementById('m-r-floor').value, type:document.getElementById('m-r-type').value, items:[]}); saveCloud(); window.app.closeModal(); } };
+                document.getElementById('g-modal-confirm').onclick = () => {
+                    const n = document.getElementById('m-r-name').value;
+                    if(n) {
+                        const newRoom = { id:Date.now(), name:n, floor:document.getElementById('m-r-floor').value, type:document.getElementById('m-r-type').value, items:[] };
+                        const tugCount = Number(document.getElementById('m-r-tugs').value) || 0;
+                        const roomType = newRoom.type;
+                        const rule = NBR.TUG_RULES[roomType] || NBR.TUG_RULES.living;
+                        const globalPF = Project.settings?.globalPF || 0.92;
+                        for (let i = 0; i < tugCount; i++) {
+                            let va = rule.base; if (rule.limit > 0 && i >= rule.limit) { va = rule.extra || 100; }
+                            newRoom.items.push({ id: Date.now() + i, type: 'outlet', name: `TUG ${i + 1}`, va: va, power: Math.round(va * globalPF), customVA: 0, modules: 1, isThreeWay: false, circuitId: null });
+                        }
+                        Project.rooms.push(newRoom); saveCloud(); window.app.closeModal();
+                    }
+                };
             },
             modalAddItem: (rid) => {
                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Adicionar Ponto";
                 const circs = Project.circuits.map(c => `<option value="${c.id}">${c.name} (${c.phase.toUpperCase()})</option>`).join('');
-                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><div class="grid grid-cols-2 gap-2"><select id="m-i-type" class="border p-2 rounded bg-white" onchange="toggleFields()"><option value="outlet">🔌 Tomada TUG</option><option value="outlet20">🛑 Tomada 20A</option><option value="switch">🔘 Interruptor</option><option value="light">💡 Iluminação</option><option value="equipment">❄️ Ar/Chuveiro</option></select><input id="m-i-name" class="border p-2 rounded" placeholder="Nome"></div><div id="div-modules" class="grid grid-cols-2 gap-2"><select id="m-i-mod" class="border p-2 rounded bg-white"><option value="1">1 Seção</option><option value="2">2 Seções</option><option value="3">3 Seções</option></select><label class="flex items-center gap-2 border p-2 rounded bg-slate-50"><input type="checkbox" id="m-i-3w"> Three-Way</label></div><div id="div-power"><input id="m-i-va" type="number" class="w-full border p-2 rounded" placeholder="Potência (VA)"><p class="text-[10px] text-slate-400 mt-1">Vazio = Auto NBR</p></div><select id="m-i-circ" class="w-full border p-2 rounded bg-white"><option value="">Sem Circuito</option>${circs}</select></div><script>function toggleFields(){const t=document.getElementById('m-i-type').value; const m=document.getElementById('div-modules'); if(t==='outlet'||t==='switch') m.classList.remove('hidden'); else m.classList.add('hidden');}<\/script>`;
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><div class="grid grid-cols-2 gap-2"><select id="m-i-type" class="border p-2 rounded bg-white" onchange="toggleFields()"><option value="outlet">🔌 Tomada TUG</option><option value="outlet20">🛑 Tomada 20A</option><option value="switch">🔘 Interruptor</option><option value="light">💡 Iluminação</option><option value="equipment">❄️ Ar/Chuveiro</option></select><input id="m-i-name" class="border p-2 rounded" placeholder="Nome"></div><div id="div-modules" class="grid grid-cols-2 gap-2"><select id="m-i-mod" class="border p-2 rounded bg-white"><option value="1">1 Seção</option><option value="2">2 Seções</option><option value="3">3 Seções</option></select><label class="flex items-center gap-2 border p-2 rounded bg-slate-50"><input type="checkbox" id="m-i-3w"> Three-Way</label></div><div id="div-power"><input id="m-i-va" type="number" class="w-full border p-2 rounded" placeholder="Potência (VA)"><p class="text-[10px] text-slate-400 mt-1">Vazio = Auto NBR (p/ TUG)</p></div><select id="m-i-circ" class="w-full border p-2 rounded bg-white"><option value="">Sem Circuito</option>${circs}</select></div><script>function toggleFields(){const t=document.getElementById('m-i-type').value; const m=document.getElementById('div-modules'); if(t==='outlet'||t==='switch') m.classList.remove('hidden'); else m.classList.add('hidden');}<\/script>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
                 document.getElementById('g-modal-confirm').onclick = () => {
                     const type = document.getElementById('m-i-type').value; let va = Number(document.getElementById('m-i-va').value); const r = Project.rooms.find(x => x.id === rid); let customVA = va > 0 ? va : 0;
                     if(type === 'outlet' && !va) { const tempIdx = r.items.filter(i => i.type === 'outlet').length; const rule = NBR.TUG_RULES[r.type] || NBR.TUG_RULES.living; if(rule.limit > 0) va = (tempIdx < rule.limit) ? rule.base : (rule.extra||100); else va = rule.base; } if(!va) va = (type === 'light') ? 100 : 0;
-                    r.items.push({ id: Date.now(), type, name: document.getElementById('m-i-name').value || 'Ponto', va, power: Math.round(va*0.92), customVA, modules: Number(document.getElementById('m-i-mod').value)||1, isThreeWay: document.getElementById('m-i-3w').checked, circuitId: document.getElementById('m-i-circ').value });
+                    r.items.push({ id: Date.now(), type, name: document.getElementById('m-i-name').value || 'Ponto', va, power: Math.round(va*(Project.settings?.globalPF||0.92)), customVA, modules: Number(document.getElementById('m-i-mod').value)||1, isThreeWay: document.getElementById('m-i-3w').checked, circuitId: document.getElementById('m-i-circ').value });
                     recalcAllTUGs(); saveCloud(); window.app.closeModal();
                 };
             },
@@ -494,7 +573,7 @@
                 const r = Project.rooms.find(x => x.id === rid); if(!r) return; const i = r.items.find(x => x.id === iid); if(!i) return;
                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Item";
                 const circs = Project.circuits.map(c => `<option value="${c.id}" ${c.id==i.circuitId?'selected':''}>${c.name} (${c.phase.toUpperCase()})</option>`).join('');
-                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="ei-name" class="w-full border p-2 rounded" value="${i.name}"><div class="grid grid-cols-2 gap-2"><input id="ei-va" type="number" class="border p-2 rounded" value="${i.va}" placeholder="Potência VA"><select id="ei-circ" class="border p-2 rounded bg-white">${circs}</select></div></div>`;
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="ei-name" class="w-full border p-2 rounded" value="${i.name}"><div class="grid grid-cols-2 gap-2"><input id="ei-va" type="number" class="border p-2 rounded" value="${i.va}" placeholder="Potência VA"><select id="ei-circ" class="border p-2 rounded bg-white"><option value="">--Sem Circuito--</option>${circs}</select></div></div>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
                 document.getElementById('g-modal-confirm').onclick = () => { i.name = document.getElementById('ei-name').value; i.va = Number(document.getElementById('ei-va').value); i.customVA = i.va; i.power = Math.round(i.va * (Project.settings?.globalPF||0.92)); i.circuitId = document.getElementById('ei-circ').value; saveCloud(); window.app.closeModal(); };
             },
@@ -509,7 +588,7 @@
                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Novo Circuito";
                 document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="c-name" class="w-full border p-2 rounded" placeholder="Nome"><div class="grid grid-cols-2 gap-2"><select id="c-qd" class="border p-2 rounded bg-white"><option value="terreo">Térreo</option><option value="superior">Superior</option></select><select id="c-phase" class="border p-2 rounded bg-white font-bold"><option value="r">Fase R</option><option value="s">Fase S</option><option value="t">Fase T</option></select></div><select id="c-gauge" class="w-full border p-2 rounded bg-white"><option value="1.5">1.5mm</option><option value="2.5">2.5mm</option><option value="4.0">4.0mm</option></select></div>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
-                document.getElementById('g-modal-confirm').onclick = () => { Project.circuits.push({ id: Date.now(), name: document.getElementById('c-name').value, qd: document.getElementById('c-qd').value, phase: document.getElementById('c-phase').value, gauge: document.getElementById('c-gauge').value, dist: 15, customAmp: 0, pf: 0.92, usage: 'power' }); saveCloud(); window.app.closeModal(); };
+                document.getElementById('g-modal-confirm').onclick = () => { Project.circuits.push({ id: Date.now(), name: document.getElementById('c-name').value, qd: document.getElementById('c-qd').value, phase: document.getElementById('c-phase').value, gauge: document.getElementById('c-gauge').value, dist: 15, customAmp: 0, pf: Project.settings?.globalPF||0.92, usage: 'power' }); saveCloud(); window.app.closeModal(); };
             },
             editPrice: (k) => {
                  const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Preço";
