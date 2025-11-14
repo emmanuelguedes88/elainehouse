@@ -249,7 +249,7 @@
         const AUTH = getAuth(app); 
         const db = getFirestore(app);
 
-        // ### V16 - CARGA COMPLETA (TUGS E LUZES) + AJUSTES EQUIPAMENTOS ###
+        // ### V17 - CORREÇÃO BUG EXCLUIR + AJUSTE AC 1200W ###
         // Dados padrão do projeto (usados se o banco de dados estiver vazio)
         const defaultData = {
             settings: { 
@@ -278,7 +278,7 @@
                     { id: 211, type: 'outlet', name: 'TUG 4', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
                 ] },
                 { id: 3, name: "Cozinha", floor: "terreo", type: "kitchen", items: [
-                    { id: 3001, type: 'equipment', name: 'Lava-Louças', va: 1543, pf: 1.0, circuitId: 501 }, // ATUALIZADO
+                    { id: 3001, type: 'equipment', name: 'Lava-Louças', va: 1543, pf: 1.0, circuitId: 501 },
                     { id: 3002, type: 'equipment', name: 'Cooktop de Indução', va: 7000, pf: 1.0, circuitId: 502 },
                     { id: 3003, type: 'equipment', name: 'Forno Elétrico', va: 2422, pf: 1.0, circuitId: 504 },
                     { id: 301, type: 'light', name: 'Ponto de Luz 1', va: 100, pf: 1.0, circuitId: 1 }, 
@@ -306,7 +306,7 @@
                     { id: 602, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
                 ] },
                 { id: 7, name: "Quarto 01 (Térreo)", floor: "terreo", type: "living", items: [
-                    { id: 701, type: 'equipment', name: 'Ar Condicionado 12000 BTU/h', va: 3822, pf: 0.92, circuitId: 401 },
+                    { id: 701, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 401 }, // 1200W
                     { id: 702, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 1 }, 
                     { id: 703, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
                     { id: 704, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
@@ -317,7 +317,7 @@
                     { id: 803, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
                 ]},
                 { id: 9, name: "Suíte Master", floor: "superior", type: "living", items: [
-                    { id: 901, type: 'equipment', name: 'Ar Condicionado 12000 BTU/h', va: 3822, pf: 0.92, circuitId: 402 },
+                    { id: 901, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 402 }, // 1200W
                     { id: 902, type: 'light', name: 'Ponto de Luz 1', va: 100, pf: 1.0, circuitId: 101 }, 
                     { id: 903, type: 'light', name: 'Ponto de Luz 2', va: 100, pf: 1.0, circuitId: 101 }, 
                     { id: 904, type: 'light', name: 'Ponto de Luz 3', va: 100, pf: 1.0, circuitId: 101 }, 
@@ -334,19 +334,19 @@
                     { id: 1103, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
                 ]},
                 { id: 12, name: "Escritório", floor: "superior", type: "living", items: [
-                    { id: 1201, type: 'equipment', name: 'Ar Condicionado 12000 BTU/h', va: 3822, pf: 0.92, circuitId: 403 },
+                    { id: 1201, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 403 }, // 1200W
                     { id: 1202, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
                     { id: 1203, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }, 
                     { id: 1204, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
                 ]},
                 { id: 13, name: "Quarto 02", floor: "superior", type: "living", items: [
-                    { id: 1301, type: 'equipment', name: 'Ar Condicionado 12000 BTU/h', va: 3822, pf: 0.92, circuitId: 404 },
+                    { id: 1301, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 404 }, // 1200W
                     { id: 1302, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
                     { id: 1303, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }, 
                     { id: 1304, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
                 ]},
                 { id: 14, name: "Quarto 03", floor: "superior", type: "living", items: [
-                    { id: 1401, type: 'equipment', name: 'Ar Condicionado 12000 BTU/h', va: 3822, pf: 0.92, circuitId: 405 },
+                    { id: 1401, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 405 }, // 1200W
                     { id: 1402, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
                     { id: 1403, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }, 
                     { id: 1404, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
@@ -419,41 +419,23 @@
                 document.getElementById('mobile-menu').classList.remove('hidden'); document.getElementById('mobile-menu').classList.add('flex');
                 
                 // Define a referência do banco de dados para este usuário
-                DB_REF = doc(db, `users/${u.uid}/data/project_elaine_final_v16`); // v16 para nova estrutura
+                DB_REF = doc(db, `users/${u.uid}/data/project_elaine_final_v17`); // v17 para nova estrutura
                 
                 // Ouve por mudanças no banco de dados em tempo real
                 onSnapshot(DB_REF, s => { 
                     if(s.exists()) { // Se o documento existe
                         Project = s.data(); // Carrega os dados
-                        // Bloco para garantir compatibilidade com versões antigas dos dados
+                        // Bloco para garantir compatibilidade com versões antigas (SÓ chaves de 1º nível)
                         if(!Project.prices) Project.prices = defaultData.prices;
                         if(!Project.mainParams) Project.mainParams = defaultData.mainParams;
                         if(!Project.settings) Project.settings = defaultData.settings;
-                        Object.keys(defaultData.prices).forEach(k => { if(Project.prices[k] === undefined) Project.prices[k] = defaultData.prices[k]; });
-                        
-                        // Atualiza cômodos e circuitos com base nos dados padrão (para novos itens)
-                        defaultData.rooms.forEach(defaultRoom => {
-                            const projectRoom = Project.rooms.find(r => r.id === defaultRoom.id);
-                            if (projectRoom) {
-                                // Garante que itens padrão (equipamentos e TUDOS) sejam adicionados se não existirem
-                                defaultRoom.items.forEach(defaultItem => {
-                                    if (!projectRoom.items.find(i => i.id === defaultItem.id)) { 
-                                        projectRoom.items.push(defaultItem); 
-                                    }
-                                });
-                            } else { 
-                                Project.rooms.push(defaultRoom); // Adiciona cômodo novo
-                            }
-                        });
-                        defaultData.circuits.forEach(dc => { 
-                            if(!Project.circuits.find(c => c.id === dc.id)) {
-                                Project.circuits.push(dc); // Adiciona circuito novo
-                            }
-                        });
                         
                         recalcAllTUGs(); // Recalcula potências
                         renderAll(); // Renderiza a interface
-                    } else saveCloud(true); // Se não existe, salva os dados padrão
+                    } else { // Documento não existe, criar pela primeira vez
+                        Project = JSON.parse(JSON.stringify(defaultData)); // Usar os dados padrão completos
+                        setDoc(DB_REF, Project).catch(console.error); // Salva direto. O snapshot vai pegar a mudança e renderizar.
+                    }
                 });
             } else { // Se o usuário não está logado
                 document.getElementById('auth-screen').classList.remove('hidden'); 
@@ -518,9 +500,8 @@
                      let powerDisplay = `${i.va || '?'}VA`;
                      if (i.name.includes('Chuveiro')) { 
                          powerDisplay = `${Math.round(i.va * (i.pf || 1.0))}W`; 
-                     } else if (i.name.includes('BTU/h')) { 
-                         const btu = i.name.split(' ')[1] || '12000'; 
-                         powerDisplay = `${btu} BTU/h`; 
+                     } else if (i.name.includes('Ar Condicionado')) { 
+                         powerDisplay = `${Math.round(i.va * (i.pf || 0.92))}W`; 
                      } else if (i.name.includes('Cooktop') || i.name.includes('Forno') || i.name.includes('Lavar') || i.name.includes('Lava-Louças')) {
                          powerDisplay = `${Math.round(i.va * (i.pf || 1.0))}W`; 
                      }
@@ -782,7 +763,7 @@
                     recalcAllTUGs(); saveCloud(); window.app.closeModal();
                 };
             },
-            // ### FUNÇÃO EDITITEM ATUALIZADA ###
+            // ### FUNÇÃO EDITITEM ATUALIZADA (v17) ###
             editItem: (rid, iid) => {
                 const r = Project.rooms.find(x => x.id === rid); if(!r) return; const i = r.items.find(x => x.id === iid); if(!i) return;
                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Item";
@@ -846,7 +827,7 @@
             },
             promptAddCircuit: () => {
                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Novo Circuito";
-                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="c-name" class="w-full border p-2 rounded" placeholder="Nome"><div class="grid grid-cols-2 gap-2"><select id="c-qd" class="border p-2 rounded bg-white"><option value="terreo">Térreo</option><option value="superior">Superior</option></select><select id="c-phase" class="border p-2 rounded bg-white font-bold"><option value="r">Fase R</option><option value="s">Fase S</option><option value="t">Fase T</option></select></div><select id="c-gauge" class="w-full border p-2 rounded bg-white"><option value="1.5">1.5mm</option><option value="2.5">2.5mm</option><option value="4.0">4.0mm</option><option value="6.0">6.0mm</option></select></div>`;
+                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="c-name" class="w-full border p-2 rounded" placeholder="Nome"><div class="grid grid-cols-2 gap-2"><select id="c-qd" class="border p-2 rounded bg-white"><option value="terreo">Térreo</foption><option value="superior">Superior</option></select><select id="c-phase" class="border p-2 rounded bg-white font-bold"><option value="r">Fase R</option><option value="s">Fase S</option><option value="t">Fase T</option></select></div><select id="c-gauge" class="w-full border p-2 rounded bg-white"><option value="1.5">1.5mm</option><option value="2.5">2.5mm</option><option value="4.0">4.0mm</option><option value="6.0">6.0mm</option></select></div>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
                 document.getElementById('g-modal-confirm').onclick = () => { Project.circuits.push({ id: Date.now(), name: document.getElementById('c-name').value, qd: document.getElementById('c-qd').value, phase: document.getElementById('c-phase').value, gauge: document.getElementById('c-gauge').value, dist: 15, customAmp: 0, pf: Project.settings?.globalPF||0.92, usage: 'power' }); saveCloud(); window.app.closeModal(); };
             },
@@ -905,5 +886,4 @@
     </script>
 </body>
 </html>
-
 
