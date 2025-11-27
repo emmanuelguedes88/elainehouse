@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Projeto Elétrico - Walter & Elaine</title>
+    <title>Projeto Elétrico - Aula NBR 5410</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         h1, h2, h3, .fun-font { font-family: 'Fredoka', sans-serif; }
         
         @media (min-width: 768px) { 
             body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; } 
-            .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 40px; }
+            .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 80px; }
         }
         @media (max-width: 767px) {
             body { padding-bottom: 90px; min-height: 100vh; }
-            .scroll-area { padding-bottom: 40px; }
+            .scroll-area { padding-bottom: 120px; }
         }
         
         .tab-content { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
@@ -30,191 +32,195 @@
         .bg-phase-s { background-color: #1e293b; color: white; }
         .bg-phase-t { background-color: #facc15; color: black; }
         
-        .auth-tab { cursor: pointer; padding-bottom: 8px; border-bottom: 3px solid transparent; color: #94a3b8; transition: all 0.2s; }
-        .auth-tab.active { border-color: #6366f1; color: #6366f1; font-weight: 700; }
-
         .filter-btn { transition: all 0.2s; border: 1px solid #e2e8f0; }
         .filter-btn.active { background-color: #4338ca; color: white; border-color: #4338ca; }
-        .filter-btn:not(.active) { background-color: white; color: #64748b; }
         
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .norm-img { width: 100%; height: auto; max-height: 250px; object-fit: contain; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; background-color: white; }
         
-        .shake { animation: shake 0.5s; }
-        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+        .calc-box { background-color: #f1f5f9; border-left: 4px solid #6366f1; padding: 12px; margin-top: 8px; font-family: monospace; font-size: 0.8rem; color: #334155; }
+        .calc-highlight { color: #4338ca; font-weight: bold; }
+
+        .price-input { background: transparent; border-bottom: 1px dashed #cbd5e1; text-align: right; width: 80px; font-weight: 600; color: #059669; }
+        .price-input:focus { outline: none; border-color: #059669; background: #ecfdf5; }
+
+        #toast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 100px; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.5s, bottom 0.5s; }
+        #toast.show { visibility: visible; opacity: 1; bottom: 110px; }
+        
+        .math-display { font-size: 1.1em; color: #1e293b; margin: 10px 0; }
     </style>
 </head>
 <body class="text-slate-800 bg-slate-50">
 
-    <!-- ECRÃ DE LOGIN -->
-    <div id="auth-screen" class="fixed inset-0 bg-gradient-to-br from-slate-900 to-slate-800 z-50 overflow-y-auto">
-        <div class="min-h-full flex items-center justify-center p-4 py-10">
-            <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 relative">
-                <div class="text-center mb-6">
-                    <div class="bg-indigo-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">⚡</div>
-                    <h1 class="text-2xl font-bold text-slate-800 mb-1 fun-font">Projeto Elétrico</h1>
-                    <p class="text-slate-500 text-xs font-medium">Walter & Elaine • NBR 5410</p>
+    <!-- TOAST -->
+    <div id="toast">Salvo na nuvem! ☁️</div>
+
+    <!-- LOGIN AUTOMÁTICO -->
+    <div id="auth-screen" class="fixed inset-0 bg-gradient-to-br from-indigo-600 to-blue-500 z-50 overflow-y-auto flex items-center justify-center">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 relative mx-4">
+            <div class="text-center mb-6">
+                <div class="bg-yellow-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl border-4 border-white shadow-lg">⚡</div>
+                <h1 class="text-2xl font-bold text-slate-800 mb-1 fun-font">Projeto Elétrico</h1>
+                <p class="text-slate-500 text-xs font-medium">Sincronizando...</p>
+            </div>
+            <div class="space-y-4">
+                <div id="loading-indicator" class="text-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p class="text-xs text-slate-400 mt-2">Conectando ao Banco de Dados</p>
                 </div>
-                <div class="flex justify-center gap-8 mb-6 border-b border-slate-100">
-                    <div onclick="window.app.switchAuthMode('login')" id="tab-login" class="auth-tab active">Entrar</div>
-                    <div onclick="window.app.switchAuthMode('register')" id="tab-register" class="auth-tab">Criar</div>
-                </div>
-                <div class="space-y-4">
-                    <input id="auth-email" type="email" class="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-indigo-500 text-sm transition-colors" placeholder="Email" autocomplete="email">
-                    <input id="auth-pass" type="password" class="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-indigo-500 text-sm transition-colors" placeholder="Senha" autocomplete="current-password">
-                    <div id="auth-error" class="hidden bg-red-50 text-red-600 text-xs p-3 rounded-lg text-center font-bold border border-red-100"></div>
-                    <button onclick="window.app.handleAuthAction()" id="btn-auth-action" class="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition text-sm active:scale-95">ACESSAR PROJETO</button>
-                </div>
+                <button id="btn-enter" onclick="window.app.handleAuthAction()" class="hidden w-full bg-slate-900 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-slate-800 transition text-sm active:scale-95">
+                    TENTAR NOVAMENTE
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- INTERFACE DA APLICAÇÃO -->
+    <!-- APP -->
     <div id="app-interface" class="hidden flex-col h-full">
-        <!-- CABEÇALHO -->
+        <!-- HEADER -->
         <header class="bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-sm z-20 sticky top-0">
             <div class="flex items-center gap-3">
-                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-md"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12H11l2-8z"/></svg></div>
-                <div><h1 class="font-bold text-lg text-slate-800 leading-none fun-font">Dimensionamento</h1><p class="text-[10px] font-bold text-indigo-600 uppercase mt-0.5">Cálculo de Demanda Customizado</p></div>
+                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-md"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+                <div><h1 class="font-bold text-lg text-slate-800 leading-none fun-font">Aula Prática</h1><p class="text-[10px] font-bold text-indigo-600 uppercase mt-0.5">Calculando d1 + d2 + d3 + d4 + d5</p></div>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="window.app.editSettings()" class="hidden md:flex bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold items-center gap-1 hover:bg-slate-200">⚙️ Config</button>
                 <div class="hidden md:flex bg-slate-100 p-1 rounded-lg gap-1">
-                    <button onclick="window.app.setTab('rooms')" id="nav-rooms" class="px-3 py-1.5 rounded-md text-xs font-bold bg-white text-indigo-600 shadow-sm">Planta</button>
-                    <button onclick="window.app.setTab('circuits')" id="nav-circuits" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-500">Cálculos</button>
-                    <button onclick="window.app.setTab('bom')" id="nav-bom" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-500">Materiais</button>
+                    <button onclick="window.app.setTab('rooms')" id="nav-rooms" class="px-3 py-1.5 rounded-md text-xs font-bold bg-white text-indigo-600 shadow-sm transition-all">1. Planta</button>
+                    <button onclick="window.app.setTab('circuits')" id="nav-circuits" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 transition-all">2. Circuitos</button>
+                    <button onclick="window.app.setTab('steps')" id="nav-steps" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 transition-all">3. AULA 🎓</button>
+                    <button onclick="window.app.setTab('bom')" id="nav-bom" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 transition-all">4. Orçamento</button>
                 </div>
-                <button onclick="window.app.handleLogout()" class="bg-red-50 text-red-500 p-2 rounded-lg hover:bg-red-100"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
             </div>
         </header>
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="scroll-area p-4 md:p-6 max-w-6xl mx-auto w-full space-y-6">
+        <!-- MAIN -->
+        <main class="scroll-area p-4 md:p-6 max-w-7xl mx-auto w-full space-y-6">
             
-            <!-- ABA 1: CÔMODOS -->
+            <!-- ABA 1: PLANTA (CÔMODOS) -->
             <div id="tab-rooms" class="tab-content active">
                 <div class="flex justify-between items-end mb-4">
-                    <div><h2 class="text-xl font-bold text-slate-800 fun-font">Cômodos</h2><p class="text-slate-500 text-xs">Gerencie os pontos de consumo.</p></div>
+                    <div><h2 class="text-xl font-bold text-slate-800 fun-font">Defina os Cômodos</h2><p class="text-slate-500 text-xs">A iluminação e as tomadas serão sugeridas pela <b>ÁREA</b>.</p></div>
                     <button onclick="window.app.promptAddRoom()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg text-sm flex items-center gap-1 hover:bg-indigo-700 transition transform active:scale-95"><span>+</span> Cômodo</button>
                 </div>
                 <div class="flex gap-2 mb-4 overflow-x-auto pb-1 snap-x">
-                    <button onclick="window.app.filterFloor('all', this)" class="filter-btn active snap-start px-4 py-1.5 rounded-full text-xs font-bold">Todos</button>
-                    <button onclick="window.app.filterFloor('subsolo', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold">Subsolo</button>
-                    <button onclick="window.app.filterFloor('terreo', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold">Térreo</button>
-                    <button onclick="window.app.filterFloor('superior', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold">Superior</button>
+                    <button onclick="window.app.filterFloor('all', this)" class="filter-btn active snap-start px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Todos</button>
+                    <button onclick="window.app.filterFloor('subsolo', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Subsolo</button>
+                    <button onclick="window.app.filterFloor('terreo', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Térreo</button>
+                    <button onclick="window.app.filterFloor('superior', this)" class="filter-btn snap-start px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Superior</button>
                 </div>
                 <div id="rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
 
-            <!-- ABA 2: CÁLCULOS -->
+            <!-- ABA 2: CÁLCULOS (CIRCUITOS) -->
             <div id="tab-circuits" class="tab-content">
-                
-                <!-- PAINEL GERAL -->
-                <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-lg mb-6 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 opacity-10 text-[100px]">⚡</div>
-                    <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div>
-                            <h2 class="text-xl font-bold fun-font text-yellow-400">Proteção Geral</h2>
-                            <p class="text-slate-400 text-xs">Disjuntor e Cabos de Entrada (Cálculo Demanda).</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="window.app.editSettings()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">⚙️ Config</button>
-                            <button onclick="window.app.editMainParams()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">📏 Distância</button>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
-                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold">Disjuntor Geral</p>
-                            <p id="gen-breaker" class="text-2xl font-bold text-white">-- A</p>
-                            <p id="gen-demand-factor" class="text-[9px] text-slate-500">Demanda: --%</p>
-                        </div>
-                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold">Cabo Entrada</p>
-                            <p id="gen-cable" class="text-2xl font-bold text-green-400">-- mm²</p>
-                            <p id="gen-dist" class="text-[9px] text-slate-500">Dist: -- m</p>
-                        </div>
-                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold">Demanda Aparente</p>
-                            <p id="gen-load-va-demand" class="text-xl font-bold text-blue-300">-- VA</p>
-                             <p id="gen-load-va-total" class="text-[9px] text-slate-500">Total: -- VA</p>
-                        </div>
-                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold">Demanda Ativa (W)</p>
-                            <p id="gen-load-w" class="text-xl font-bold text-yellow-400">-- W</p>
-                            <p class="text-[9px] text-slate-500">Potência de Demanda (d1..d5)</p>
-                        </div>
-                    </div>
+                <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wide mb-2">⚖️ Balanceamento de Fases</h3>
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="bg-white p-3 rounded-xl border-b-4 border-red-500 shadow-sm text-center"><span class="text-[10px] font-bold text-slate-400 uppercase">Fase R</span><div id="load-r-w" class="text-lg font-black text-red-600">0 W</div><div id="load-r-a" class="text-[10px] font-mono text-slate-500">0.0 A</div></div>
+                    <div class="bg-white p-3 rounded-xl border-b-4 border-slate-900 shadow-sm text-center"><span class="text-[10px] font-bold text-slate-400 uppercase">Fase S</span><div id="load-s-w" class="text-lg font-black text-slate-900">0 W</div><div id="load-s-a" class="text-[10px] font-mono text-slate-500">0.0 A</div></div>
+                    <div class="bg-white p-3 rounded-xl border-b-4 border-yellow-400 shadow-sm text-center"><span class="text-[10px] font-bold text-slate-400 uppercase">Fase T</span><div id="load-t-w" class="text-lg font-black text-yellow-600">0 W</div><div id="load-t-a" class="text-[10px] font-mono text-slate-500">0.0 A</div></div>
                 </div>
-
-                <!-- EQUILIBRIO -->
                 <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wide">Balanceamento (Carga Total Instalada)</h3>
+                    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wide">Quadro de Distribuição</h3>
                     <button onclick="window.app.promptAddCircuit()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-indigo-700">+ Circuito</button>
                 </div>
-                <div class="grid grid-cols-3 gap-3 mb-6">
-                    <div class="bg-white p-3 rounded-xl border-b-4 border-red-500 shadow-sm text-center">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Fase R</span>
-                        <div id="load-r-w" class="text-lg font-black text-red-600">0 W</div>
-                        <div id="load-r-a" class="text-[10px] font-mono text-slate-500 mt-1">0.0 A</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border-b-4 border-slate-900 shadow-sm text-center">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Fase S</span>
-                        <div id="load-s-w" class="text-lg font-black text-slate-900">0 W</div>
-                        <div id="load-s-a" class="text-[10px] font-mono text-slate-500 mt-1">0.0 A</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border-b-4 border-yellow-400 shadow-sm text-center">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Fase T</span>
-                        <div id="load-t-w" class="text-lg font-black text-yellow-600">0 W</div>
-                        <div id="load-t-a" class="text-[10px] font-mono text-slate-500 mt-1">0.0 A</div>
-                    </div>
-                </div>
-
-                <!-- LISTAS DE CIRCUITOS -->
                 <div class="grid lg:grid-cols-2 gap-6">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center px-2"><h3 class="font-bold text-slate-700">🏠 QD Térreo</h3><span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">Quadro 1</span></div>
-                        <div id="list-qd-terreo" class="space-y-2"></div>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center px-2"><h3 class="font-bold text-slate-700">🛌 QD Superior</h3><span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">Quadro 2</span></div>
-                        <div id="list-qd-superior" class="space-y-2"></div>
-                    </div>
+                    <div class="space-y-3"><div class="flex justify-between items-center px-2"><h3 class="font-bold text-slate-700">🏠 QD Térreo</h3><span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">Quadro 1</span></div><div id="list-qd-terreo" class="space-y-2"></div></div>
+                    <div class="space-y-3"><div class="flex justify-between items-center px-2"><h3 class="font-bold text-slate-700">🛌 QD Superior</h3><span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">Quadro 2</span></div><div id="list-qd-superior" class="space-y-2"></div></div>
                 </div>
             </div>
 
-            <!-- ABA 3: MATERIAIS -->
+            <!-- ABA 3: MEMÓRIA DIDÁTICA (AULA) -->
+            <div id="tab-steps" class="tab-content">
+                <div class="max-w-6xl mx-auto">
+                    <!-- Cabeçalho Aula -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row gap-6 items-center">
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-bold text-indigo-900 fun-font mb-2">Como calcular a Demanda? 🧮</h2>
+                            <p class="text-slate-600 text-sm mb-4">Não basta somar tudo! Precisamos aplicar os <b>Fatores de Demanda</b>. Nem todas as luzes e chuveiros ficam ligados ao mesmo tempo.</p>
+                            <div class="bg-slate-100 p-3 rounded-lg font-mono text-center text-indigo-700 font-bold border border-slate-200">d = d1 + d2 + d3 + d4 + d5</div>
+                        </div>
+                        <div class="w-full md:w-1/3 text-center">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Referência Oficial:</p>
+                            <img id="img-formula" src="" alt="Fórmula Demanda" class="norm-img" onclick="window.open(this.src, '_blank')">
+                        </div>
+                    </div>
+
+                    <!-- TEORIA -->
+                    <div class="mb-10 p-5 bg-blue-50 rounded-xl border border-blue-100">
+                        <h2 class="text-xl font-bold text-blue-900 fun-font mb-4 flex items-center gap-2"><span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">0</span>Teoria: Previsão de Cargas</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <h3 class="font-bold text-slate-800 mb-2 border-b pb-2">💡 Iluminação (VA)</h3>
+                                <img id="img-didatico-luz" src="" class="norm-img h-32 object-top mb-2" onclick="window.open(this.src, '_blank')">
+                                <ul class="list-disc ml-5 text-xs text-slate-500 space-y-1"><li>Até 6m²: <b>100 VA</b></li><li>> 6m²: <b>100 VA</b> + <b>60 VA</b> a cada 4m² excedentes.</li></ul>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <h3 class="font-bold text-slate-800 mb-2 border-b pb-2">🔌 Tomadas (TUGs)</h3>
+                                <img id="img-didatico-tug" src="" class="norm-img h-32 object-top mb-2" onclick="window.open(this.src, '_blank')">
+                                <ul class="list-disc ml-5 text-xs text-slate-500 space-y-1"><li><b>Banheiros:</b> Min 1 de 600 VA.</li><li><b>Cozinha:</b> 3 de 600 VA, resto 100 VA.</li></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CÁLCULOS POR CÔMODO -->
+                    <div class="mb-10">
+                        <h2 class="text-xl font-bold text-slate-800 fun-font mb-4 flex items-center gap-2"><span class="bg-slate-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>Calculadora: Seus Cômodos</h2>
+                        <div id="room-calc-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    </div>
+
+                    <div class="h-px bg-slate-200 my-8"></div>
+
+                    <!-- REFERÊNCIAS E RESULTADOS -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-bold text-slate-700 mb-2">Tabelas de Potência (NDU)</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <img id="img-tab4-1" src="" class="norm-img" alt="Tabela 4" onclick="window.open(this.src, '_blank')">
+                            <img id="img-tab4-2" src="" class="norm-img" alt="Tabela 4 cont" onclick="window.open(this.src, '_blank')">
+                        </div>
+                    </div>
+                    <div id="calc-steps-content" class="space-y-12 pb-12"></div>
+                </div>
+            </div>
+
+            <!-- ABA 4: ORÇAMENTO -->
             <div id="tab-bom" class="tab-content">
-                <h2 class="text-xl font-bold text-slate-800 fun-font mb-4">Quantitativo e Custos</h2>
-                <div id="bom-cables" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
-                <div id="bom-items" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
-                
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-12">
-                    <div class="bg-slate-900 text-white px-4 py-3"><h3 class="font-bold text-sm">Orçamento Detalhado</h3></div>
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left text-sm min-w-[450px]">
-                            <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
-                                <tr><th class="p-3 font-semibold">Item</th><th class="p-3 text-center">Qtd</th><th class="p-3 text-right">Unit (R$)</th><th class="p-3 text-right">Total</th></tr>
-                            </thead>
-                            <tbody id="budget-tbody" class="divide-y divide-slate-100"></tbody>
-                            <tfoot class="bg-yellow-50 text-slate-900 font-bold border-t-2 border-yellow-200">
-                                <tr><td colspan="3" class="p-4 text-right uppercase text-xs tracking-wide">Total Geral</td><td id="budget-total" class="p-4 text-right text-lg text-indigo-700">R$ 0,00</td></tr>
-                            </tfoot>
-                        </table>
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 fun-font">Orçamento Estimado 💰</h2>
+                        <p class="text-xs text-slate-500">João Pessoa, PB (Editável)</p>
+                    </div>
+                    <div class="bg-green-100 text-green-800 px-4 py-2 rounded-xl text-right shadow-sm">
+                        <p class="text-[10px] uppercase font-bold">Total</p>
+                        <p id="bom-total-price" class="text-xl font-black">R$ 0,00</p>
                     </div>
                 </div>
+                
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto mb-8">
+                    <table class="w-full text-sm text-left min-w-[400px]">
+                        <thead class="bg-slate-50 text-slate-500 font-bold text-xs uppercase">
+                            <tr>
+                                <th class="p-3 whitespace-nowrap">Item</th>
+                                <th class="p-3 text-center">Qtd</th>
+                                <th class="p-3 text-right">Unit. (R$)</th>
+                                <th class="p-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bom-table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+                <p class="text-[10px] text-slate-400 text-center italic">*A estimativa de cabos é baseada na distância informada nos circuitos x 2.5 (fator de sobra/curvas).</p>
             </div>
         </main>
     </div>
 
     <!-- MENU MOBILE -->
-    <div id="mobile-menu" class="md:hidden hidden fixed bottom-0 w-full bg-white border-t border-slate-200 p-2 justify-around z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] safe-area-pb">
+    <div id="mobile-menu" class="md:hidden hidden fixed bottom-0 w-full bg-white border-t border-slate-200 p-2 justify-around z-40 shadow-lg safe-area-pb">
         <button onclick="window.app.setTab('rooms')" id="mob-rooms" class="flex-1 py-1 text-indigo-600 flex flex-col items-center gap-1"><span class="text-xl">🏡</span><span class="text-[9px] font-bold">Planta</span></button>
-        <button onclick="window.app.setTab('circuits')" id="mob-circuits" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1"><span class="text-xl">⚡</span><span class="text-[9px] font-bold">Cálculos</span></button>
-        <button onclick="window.app.setTab('bom')" id="mob-bom" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1"><span class="text-xl">📋</span><span class="text-[9px] font-bold">Materiais</span></button>
+        <button onclick="window.app.setTab('circuits')" id="mob-circuits" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1"><span class="text-xl">⚡</span><span class="text-[9px] font-bold">Quadros</span></button>
+        <button onclick="window.app.setTab('steps')" id="mob-steps" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1"><span class="text-xl">🎓</span><span class="text-[9px] font-bold">Aula</span></button>
+        <button onclick="window.app.setTab('bom')" id="mob-bom" class="flex-1 py-1 text-slate-400 flex flex-col items-center gap-1"><span class="text-xl">💰</span><span class="text-[9px] font-bold">Orça.</span></button>
     </div>
 
-    <!-- MODAL GENÉRICO -->
+    <!-- MODAL -->
     <div id="generic-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 max-h-[90vh] overflow-y-auto">
             <h3 id="g-modal-title" class="text-lg font-bold text-slate-800 mb-2 fun-font"></h3>
@@ -226,662 +232,691 @@
         </div>
     </div>
 
-    <!-- SCRIPT DA APLICAÇÃO -->
     <script type="module">
-        // Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuração do Firebase (Chaves de exemplo)
-        const firebaseConfig = { 
-            apiKey: "AIzaSyByJ0jEYJm1ZbwJEWJy5uTwCVn2M3LA644", 
-            authDomain: "elainehouse-c4b4b.firebaseapp.com", 
-            projectId: "elainehouse-c4b4b", 
-            storageBucket: "elainehouse-c4b4b.firebasestorage.app", 
-            messagingSenderId: "105394705921", 
-            appId: "1:105394705921:web:63c7993c59514ecd3ad200", 
-            measurementId: "G-TKZ37YREMG" 
-        };
-
-        // Inicialização do Firebase
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
         const app = initializeApp(firebaseConfig); 
         const AUTH = getAuth(app); 
         const db = getFirestore(app);
 
-        // ### V17 - CORREÇÃO BUG EXCLUIR + AJUSTE AC 1200W ###
-        // Dados padrão do projeto (usados se o banco de dados estiver vazio)
+        const USER_IMAGES = [
+            "https://i.postimg.cc/3JkY1Wrk/Img8.jpg", 
+            "https://i.postimg.cc/MG7WB46d/Img6.jpg", 
+            "https://i.postimg.cc/nrzZ6hvk/Img7.jpg", 
+            "https://i.postimg.cc/dtftcrN1/Img5.jpg", 
+            "https://i.postimg.cc/sXJDkLbv/Img4.jpg", 
+            "https://i.postimg.cc/zfKfjvjn/Img3.jpg", 
+            "https://i.postimg.cc/nhsrX09P/Img2.jpg", 
+            "https://i.postimg.cc/L5N51WVt/Img1.jpg", 
+            "https://i.postimg.cc/FKkY6myd/Screenshot-20251126-174442-M365-Copilot.jpg",
+            "https://i.postimg.cc/SK9Krdqb/Screenshot-20251126-174305-M365-Copilot.jpg",
+            "https://i.postimg.cc/0yTkbSSw/Screenshot-20251126-173528-M365-Copilot.jpg"
+        ];
+
+        const JP_PRICES = {
+            breaker_1: 18.90, breaker_3: 95.00, idr: 220.00, outlet: 24.50,
+            light_point: 15.00, switch: 12.50,
+            cable_15: 1.85, cable_25: 2.95, cable_40: 6.20, cable_60: 9.80
+        };
+
         const defaultData = {
-            settings: { 
-                globalPF: 0.92, // Fator de Potência Global
-            },
-            mainParams: { dist: 20 }, // Distância do padrão de entrada
+            settings: { globalPF: 0.92 },
+            prices: JSON.parse(JSON.stringify(JP_PRICES)),
             rooms: [
-                { id: 1, name: "Garagem (Subsolo)", floor: "subsolo", type: "external", items: [
-                    { id: 101, type: 'light', name: 'Ponto de Luz 1', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 102, type: 'light', name: 'Ponto de Luz 2', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 103, type: 'light', name: 'Ponto de Luz 3', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 104, type: 'light', name: 'Ponto de Luz 4', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 105, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
-                ] },
-                { id: 2, name: "Sala Estar/Jantar", floor: "terreo", type: "living", items: [
-                    { id: 201, type: 'light', name: 'Ponto de Luz 1', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 202, type: 'light', name: 'Ponto de Luz 2', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 203, type: 'light', name: 'Ponto de Luz 3', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 204, type: 'light', name: 'Ponto de Luz 4', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 205, type: 'light', name: 'Ponto de Luz 5', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 206, type: 'light', name: 'Ponto de Luz 6', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 207, type: 'light', name: 'Ponto de Luz 7', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 208, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 209, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 210, type: 'outlet', name: 'TUG 3', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 211, type: 'outlet', name: 'TUG 4', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
-                ] },
-                { id: 3, name: "Cozinha", floor: "terreo", type: "kitchen", items: [
-                    { id: 3001, type: 'equipment', name: 'Lava-Louças', va: 1543, pf: 1.0, circuitId: 501 },
-                    { id: 3002, type: 'equipment', name: 'Cooktop de Indução', va: 7000, pf: 1.0, circuitId: 502 },
-                    { id: 3003, type: 'equipment', name: 'Forno Elétrico', va: 2422, pf: 1.0, circuitId: 504 },
-                    { id: 301, type: 'light', name: 'Ponto de Luz 1', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 302, type: 'light', name: 'Ponto de Luz 2', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 303, type: 'light', name: 'Ponto de Luz 3', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 304, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 305, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 306, type: 'outlet', name: 'TUG 3', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 307, type: 'outlet', name: 'TUG 4', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
+                { id: 99, name: "Garagem", floor: "subsolo", type: "living", area: 30, items: [
+                    { id: 9901, type: 'light', name: 'Luz Teto', va: 100, pf: 1.0, circuitId: 1 },
+                    { id: 9902, type: 'outlet', name: 'TUG', va: 100, pf: 0.92, circuitId: 2 }
                 ]},
-                { id: 4, name: "Terraço Gourmet", floor: "terreo", type: "kitchen", items: [
-                    { id: 401, type: 'light', name: 'Ponto de Luz 1', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 402, type: 'light', name: 'Ponto de Luz 2', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 403, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 404, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
-                ] },
-                { id: 5, name: "Área de Serviço", floor: "terreo", type: "kitchen", items: [
-                    { id: 5001, type: 'equipment', name: 'Máquina Lavar', va: 2280, pf: 1.0, circuitId: 503 },
-                    { id: 501, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 502, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 503, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
+                { id: 5, name: "Escritório", floor: "superior", type: "living", area: 10, items: [
+                    { id: 5001, type: 'light', name: 'Luz Centro', va: 160, pf: 1.0, circuitId: 101 },
+                    { id: 5002, type: 'outlet', name: 'Computador', va: 200, pf: 0.92, circuitId: 102 },
+                    { id: 5003, type: 'equipment', name: 'Ar Split 9000', va: 1200, pf: 0.92, circuitId: 401 }
                 ]},
-                { id: 6, name: "Depósito", floor: "terreo", type: "living", items: [
-                    { id: 601, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 602, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
-                ] },
-                { id: 7, name: "Quarto 01 (Térreo)", floor: "terreo", type: "living", items: [
-                    { id: 701, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 401 }, // 1200W
-                    { id: 702, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 703, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }, 
-                    { id: 704, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
+                { id: 1, name: "Sala Estar", floor: "terreo", type: "living", area: 20, items: [
+                    { id: 101, type: 'light', name: 'Lustre Central', va: 160, pf: 1.0, circuitId: 1 },
+                    { id: 102, type: 'outlet', name: 'TV', va: 100, pf: 0.92, circuitId: 2 },
+                    { id: 103, type: 'outlet', name: 'Geral', va: 100, pf: 0.92, circuitId: 2 },
+                    { id: 104, type: 'outlet', name: 'Geral', va: 100, pf: 0.92, circuitId: 2 }
                 ]},
-                { id: 8, name: "WCB 01 Social", floor: "terreo", type: "bathroom", items: [
-                    { id: 801, type: 'equipment', name: 'Chuveiro 6600W', va: 6600, pf: 1.0, circuitId: 301 },
-                    { id: 802, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 803, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
+                { id: 2, name: "Cozinha", floor: "terreo", type: "kitchen", area: 12, items: [
+                    { id: 201, type: 'light', name: 'Luz Teto', va: 160, pf: 1.0, circuitId: 1 },
+                    { id: 202, type: 'outlet', name: 'Geladeira', va: 600, pf: 0.92, circuitId: 2 },
+                    { id: 203, type: 'outlet', name: 'Bancada 1', va: 600, pf: 0.92, circuitId: 2 },
+                    { id: 204, type: 'outlet', name: 'Bancada 2', va: 600, pf: 0.92, circuitId: 2 },
+                    { id: 3001, type: 'equipment', name: 'Forno Elétrico', va: 3000, pf: 1.0, circuitId: 504 },
+                    { id: 3002, type: 'equipment', name: 'Lava Louças', va: 1543, pf: 1.0, circuitId: 501 },
+                    { id: 3003, type: 'equipment', name: 'Cooktop', va: 7000, pf: 1.0, circuitId: 502 }
                 ]},
-                { id: 9, name: "Suíte Master", floor: "superior", type: "living", items: [
-                    { id: 901, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 402 }, // 1200W
-                    { id: 902, type: 'light', name: 'Ponto de Luz 1', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 903, type: 'light', name: 'Ponto de Luz 2', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 904, type: 'light', name: 'Ponto de Luz 3', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 905, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }, 
-                    { id: 906, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
+                { id: 3, name: "Banheiro Social", floor: "terreo", type: "bathroom", area: 4, items: [
+                    { id: 301, type: 'light', name: 'Luz', va: 100, pf: 1.0, circuitId: 1 },
+                    { id: 302, type: 'outlet', name: 'Secador', va: 600, pf: 0.92, circuitId: 2 },
+                    { id: 4001, type: 'equipment', name: 'Chuveiro 6800W', va: 6800, pf: 1.0, circuitId: 301 }
                 ]},
-                { id: 10, name: "Closet Master", floor: "superior", type: "living", items: [
-                    { id: 1001, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 1002, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
-                ] },
-                { id: 11, name: "WCB Suíte", floor: "superior", type: "bathroom", items: [
-                    { id: 1101, type: 'equipment', name: 'Chuveiro 6600W', va: 6600, pf: 1.0, circuitId: 302 },
-                    { id: 1102, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 1103, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
+                 { id: 4, name: "Área Serviço", floor: "terreo", type: "kitchen", area: 6, items: [
+                    { id: 401, type: 'light', name: 'Luz', va: 100, pf: 1.0, circuitId: 1 },
+                    { id: 402, type: 'outlet', name: 'Ferro', va: 600, pf: 0.92, circuitId: 2 },
+                    { id: 4002, type: 'equipment', name: 'Lava Roupas 15kg', va: 2280, pf: 1.0, circuitId: 503 }
                 ]},
-                { id: 12, name: "Escritório", floor: "superior", type: "living", items: [
-                    { id: 1201, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 403 }, // 1200W
-                    { id: 1202, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 1203, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }, 
-                    { id: 1204, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
+                { id: 9, name: "Suíte Master", floor: "superior", type: "living", area: 16, items: [
+                    { id: 901, type: 'equipment', name: 'Ar Cond. 12000', va: 1300, pf: 0.92, circuitId: 402 },
+                    { id: 902, type: 'light', name: 'Luz Quarto', va: 160, pf: 1.0, circuitId: 101 },
+                    { id: 905, type: 'outlet', name: 'Cabeceira', va: 100, pf: 0.92, circuitId: 102 }
                 ]},
-                { id: 13, name: "Quarto 02", floor: "superior", type: "living", items: [
-                    { id: 1301, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 404 }, // 1200W
-                    { id: 1302, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 1303, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }, 
-                    { id: 1304, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
+                { id: 10, name: "Quarto 1", floor: "superior", type: "living", area: 12, items: [
+                    { id: 1001, type: 'equipment', name: 'Ar Split 9000', va: 1200, pf: 0.92, circuitId: 403 },
+                    { id: 1002, type: 'light', name: 'Luz Quarto', va: 100, pf: 1.0, circuitId: 101 },
+                    { id: 1003, type: 'outlet', name: 'TUG', va: 100, pf: 0.92, circuitId: 102 }
                 ]},
-                { id: 14, name: "Quarto 03", floor: "superior", type: "living", items: [
-                    { id: 1401, type: 'equipment', name: 'Ar Condicionado 1200W', va: 1304, pf: 0.92, circuitId: 405 }, // 1200W
-                    { id: 1402, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 1403, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }, 
-                    { id: 1404, type: 'outlet', name: 'TUG 2', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
+                { id: 12, name: "Quarto 2", floor: "superior", type: "living", area: 12, items: [
+                    { id: 1201, type: 'equipment', name: 'Ar Split 9000', va: 1200, pf: 0.92, circuitId: 404 },
+                    { id: 1202, type: 'light', name: 'Luz Quarto', va: 100, pf: 1.0, circuitId: 101 },
+                    { id: 1203, type: 'outlet', name: 'TUG', va: 100, pf: 0.92, circuitId: 102 }
                 ]},
-                { id: 15, name: "WCB 03 Social", floor: "superior", type: "bathroom", items: [
-                    { id: 1501, type: 'equipment', name: 'Chuveiro 6600W', va: 6600, pf: 1.0, circuitId: 303 },
-                    { id: 1502, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 1503, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 102, customVA: 0, modules: 1 }
+                { id: 13, name: "Quarto 3", floor: "superior", type: "living", area: 12, items: [
+                    { id: 1301, type: 'equipment', name: 'Ar Split 9000', va: 1200, pf: 0.92, circuitId: 405 },
+                    { id: 1302, type: 'light', name: 'Luz Quarto', va: 100, pf: 1.0, circuitId: 101 },
+                    { id: 1303, type: 'outlet', name: 'TUG', va: 100, pf: 0.92, circuitId: 102 }
                 ]},
-                { id: 16, name: "Circulação", floor: "superior", type: "living", items: [
-                    { id: 1601, type: 'light', name: 'Ponto de Luz 1', va: 100, pf: 1.0, circuitId: 101 }, 
-                    { id: 1602, type: 'light', name: 'Ponto de Luz 2', va: 100, pf: 1.0, circuitId: 101 }
-                ] },
-                { id: 17, name: "WCB Serviço (Térreo)", floor: "terreo", type: "bathroom", items: [ // 4º chuveiro
-                    { id: 1701, type: 'equipment', name: 'Chuveiro 6600W', va: 6600, pf: 1.0, circuitId: 304 },
-                    { id: 1702, type: 'light', name: 'Ponto de Luz', va: 100, pf: 1.0, circuitId: 1 }, 
-                    { id: 1703, type: 'outlet', name: 'TUG 1', va: 0, pf: 0.92, circuitId: 2, customVA: 0, modules: 1 }
+                { id: 11, name: "WCB Suíte", floor: "superior", type: "bathroom", area: 5, items: [
+                    { id: 1101, type: 'equipment', name: 'Chuveiro 7500W', va: 7500, pf: 1.0, circuitId: 302 },
+                    { id: 1102, type: 'light', name: 'Luz', va: 100, pf: 1.0, circuitId: 101 },
+                    { id: 1103, type: 'outlet', name: 'Bancada', va: 600, pf: 0.92, circuitId: 102 }
+                ]},
+                { id: 15, name: "WCB Social Sup.", floor: "superior", type: "bathroom", area: 4, items: [
+                    { id: 1501, type: 'equipment', name: 'Chuveiro 6800W', va: 6800, pf: 1.0, circuitId: 303 },
+                    { id: 1502, type: 'light', name: 'Luz', va: 100, pf: 1.0, circuitId: 101 },
+                    { id: 1503, type: 'outlet', name: 'Secador', va: 600, pf: 0.92, circuitId: 102 }
                 ]}
             ],
             circuits: [
-                { id: 1, name: "Iluminação Térreo", qd: "terreo", phase: "r", gauge: "1.5", usage: "lighting", dist: 20, pf: 1.0 },
+                { id: 1, name: "Ilum. Térreo", qd: "terreo", phase: "r", gauge: "1.5", usage: "lighting", dist: 20, pf: 1.0 },
                 { id: 2, name: "TUGs Térreo", qd: "terreo", phase: "s", gauge: "2.5", usage: "power", dist: 15, pf: 0.92 },
-                { id: 101, name: "Iluminação Superior", qd: "superior", phase: "t", gauge: "1.5", usage: "lighting", dist: 20, pf: 1.0 },
+                { id: 101, name: "Ilum. Superior", qd: "superior", phase: "t", gauge: "1.5", usage: "lighting", dist: 20, pf: 1.0 },
                 { id: 102, name: "TUGs Superior", qd: "superior", phase: "r", gauge: "2.5", usage: "power", dist: 15, pf: 0.92 },
-                { id: 301, name: "Chuveiro WCB 01", qd: "terreo", phase: "t", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 40 },
-                { id: 302, name: "Chuveiro Suíte", qd: "superior", phase: "r", gauge: "6.0", usage: "specific", dist: 10, pf: 1.0, customAmp: 40 },
-                { id: 303, name: "Chuveiro WCB 03", qd: "superior", phase: "s", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 40 },
-                { id: 304, name: "Chuveiro WCB Serviço", qd: "terreo", phase: "s", gauge: "6.0", usage: "specific", dist: 18, pf: 1.0, customAmp: 40 }, // 4º chuveiro
-                { id: 401, name: "AC Quarto 01", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 15, pf: 0.92 },
+                { id: 301, name: "Chuv. Social Ter.", qd: "terreo", phase: "t", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 40 },
+                { id: 302, name: "Chuv. Suíte", qd: "superior", phase: "r", gauge: "6.0", usage: "specific", dist: 10, pf: 1.0, customAmp: 40 },
+                { id: 303, name: "Chuv. Social Sup.", qd: "superior", phase: "s", gauge: "6.0", usage: "specific", dist: 12, pf: 1.0, customAmp: 40 },
+                { id: 401, name: "AC Escritório", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 10, pf: 0.92 },
                 { id: 402, name: "AC Suíte", qd: "superior", phase: "t", gauge: "2.5", usage: "specific", dist: 10, pf: 0.92 },
-                { id: 403, name: "AC Escritório", qd: "superior", phase: "t", gauge: "2.5", usage: "specific", dist: 12, pf: 0.92 },
-                { id: 404, name: "AC Quarto 02", qd: "superior", phase: "r", gauge: "2.5", usage: "specific", dist: 15, pf: 0.92 },
-                { id: 405, name: "AC Quarto 03", qd: "superior", phase: "s", gauge: "2.5", usage: "specific", dist: 18, pf: 0.92 },
-                { id: 501, name: "TUE Lava-Louças", qd: "terreo", phase: "s", gauge: "2.5", usage: "specific", dist: 15, pf: 1.0 }, // PF 1.0
-                { id: 502, name: "TUE Cooktop", qd: "terreo", phase: "t", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 40 },
-                { id: 503, name: "TUE Lava-Roupas", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 18, pf: 1.0 },
-                { id: 504, name: "TUE Forno Elétrico", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 15, pf: 1.0 } // Forno
-            ],
-            prices: { // Preços de exemplo para orçamento
-                outlet: 14.50, outlet2: 22.00, outlet3: 29.90, outlet20: 18.90, equipment: 0,
-                light: 12.00, switch: 12.00, switch2: 18.90, switch3: 25.50, switch3w: 19.90, 
-                breaker: 25.00, breakerMain: 120.00, dr: 180.00, board: 135.00, 
-                'cable1.5': 1.60, 'cable2.5': 2.40, 'cable4.0': 4.80, 'cable6.0': 7.50, 'cable10.0': 14.00, 'cable16.0': 22.00, 'cable25.0': 35.00,
-                'cable35.0': 45.00, 'cable50.0': 60.00, 'cable70.0': 80.00, 'cable95.0': 100.00, 'cable120.0': 120.00 // Preços adicionados
+                { id: 403, name: "AC Quarto 1", qd: "superior", phase: "s", gauge: "2.5", usage: "specific", dist: 12, pf: 0.92 },
+                { id: 404, name: "AC Quarto 2", qd: "superior", phase: "t", gauge: "2.5", usage: "specific", dist: 14, pf: 0.92 },
+                { id: 405, name: "AC Quarto 3", qd: "superior", phase: "r", gauge: "2.5", usage: "specific", dist: 16, pf: 0.92 },
+                { id: 501, name: "Lava-Louças", qd: "terreo", phase: "s", gauge: "2.5", usage: "specific", dist: 15, pf: 1.0 },
+                { id: 502, name: "Cooktop", qd: "terreo", phase: "t", gauge: "6.0", usage: "specific", dist: 15, pf: 1.0, customAmp: 40 },
+                { id: 503, name: "Lava-Roupas", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 18, pf: 1.0 },
+                { id: 504, name: "Forno", qd: "terreo", phase: "r", gauge: "2.5", usage: "specific", dist: 15, pf: 1.0 }
+            ]
+        };
+
+        let Project = JSON.parse(JSON.stringify(defaultData));
+        let DB_REF = null;
+        let currentFloorFilter = 'all';
+        let CALCULATED_DATA = null;
+
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(AUTH, __initial_auth_token);
+                } else {
+                    await signInAnonymously(AUTH);
+                }
+            } catch (error) {
+                document.getElementById('loading-indicator').classList.add('hidden');
+                document.getElementById('btn-enter').classList.remove('hidden');
             }
         };
+        initAuth();
 
-        // Constantes da NBR 5410
-        const NBR = { 
-            VOLTAGE: 220, // Tensão fase-neutro
-            TUG_RULES: { // Regras de potência para TUGs (Tomadas de Uso Geral)
-                living: { base: 100, limit: 0 }, // Salas/Quartos: 100VA por ponto
-                kitchen: { base: 600, limit: 3, extra: 100 }, // Cozinhas: 600VA nos 3 primeiros, 100VA nos seguintes
-                bathroom: { base: 600, limit: 1 }, // Banheiros: 600VA em 1 ponto
-                external: { base: 100, limit: 0 } // Externo: 100VA por ponto
-            } 
-        };
-
-        // Variáveis globais da aplicação
-        let Project = JSON.parse(JSON.stringify(defaultData)); // Armazena os dados do projeto
-        let DB_REF = null; // Referência para o documento no Firestore
-        let currentFloorFilter = 'all'; // Filtro de andar atual
-        let SAVE_TIMER = null; // Timer para salvar automaticamente
-
-        // Observador de Autenticação do Firebase
         onAuthStateChanged(AUTH, u => {
-            if(u) { // Se o usuário está logado
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('app-interface').classList.remove('hidden'); document.getElementById('app-interface').classList.add('flex');
-                document.getElementById('mobile-menu').classList.remove('hidden'); document.getElementById('mobile-menu').classList.add('flex');
+            if(u) {
+                document.getElementById('auth-screen').classList.add('hidden'); 
+                document.getElementById('app-interface').classList.remove('hidden'); 
+                document.getElementById('app-interface').classList.add('flex'); 
+                document.getElementById('mobile-menu').classList.remove('hidden'); 
+                document.getElementById('mobile-menu').classList.add('flex');
                 
-                // Define a referência do banco de dados para este usuário
-                DB_REF = doc(db, `users/${u.uid}/data/project_elaine_final_v17`); // v17 para nova estrutura
+                DB_REF = doc(db, 'artifacts', appId, 'users', u.uid, 'data', 'project_data');
                 
-                // Ouve por mudanças no banco de dados em tempo real
-                onSnapshot(DB_REF, s => { 
-                    if(s.exists()) { // Se o documento existe
-                        Project = s.data(); // Carrega os dados
-                        // Bloco para garantir compatibilidade com versões antigas (SÓ chaves de 1º nível)
-                        if(!Project.prices) Project.prices = defaultData.prices;
-                        if(!Project.mainParams) Project.mainParams = defaultData.mainParams;
-                        if(!Project.settings) Project.settings = defaultData.settings;
-                        
-                        recalcAllTUGs(); // Recalcula potências
-                        renderAll(); // Renderiza a interface
-                    } else { // Documento não existe, criar pela primeira vez
-                        Project = JSON.parse(JSON.stringify(defaultData)); // Usar os dados padrão completos
-                        setDoc(DB_REF, Project).catch(console.error); // Salva direto. O snapshot vai pegar a mudança e renderizar.
+                onSnapshot(DB_REF, (s) => { 
+                    if(s.exists()) { 
+                        const remoteData = s.data();
+                        if(!remoteData.prices) remoteData.prices = JSON.parse(JSON.stringify(JP_PRICES));
+                        Project = remoteData;
+                        renderAll(); 
+                    } else { 
+                        Project = JSON.parse(JSON.stringify(defaultData)); 
+                        setDoc(DB_REF, Project); 
+                        renderAll();
                     }
                 });
-            } else { // Se o usuário não está logado
+            } else { 
                 document.getElementById('auth-screen').classList.remove('hidden'); 
-                document.getElementById('app-interface').classList.add('hidden'); 
-                document.getElementById('mobile-menu').classList.add('hidden'); 
             }
         });
 
-        // Função para salvar no Firestore
-        function saveCloud(immediate) { 
-            if(DB_REF) { 
-                clearTimeout(SAVE_TIMER); 
-                const fn = () => setDoc(DB_REF, Project).catch(console.error); 
-                if(immediate) fn(); // Salva imediatamente
-                else SAVE_TIMER = setTimeout(fn, 1000); // Salva após 1 segundo (evita excesso de escritas)
-            } 
-            renderAll(); // Atualiza a interface a cada salvamento
+        function saveCloud() { 
+            if(DB_REF) {
+                setDoc(DB_REF, Project).then(() => {
+                    showToast();
+                }).catch(console.error);
+            }
+            renderAll(); 
+        }
+
+        function showToast() {
+            const t = document.getElementById("toast");
+            t.className = "show";
+            setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000);
         }
         
-        // Renderiza todas as seções da UI
         function renderAll() { 
+            CALCULATED_DATA = calculateDemand(); 
             renderRooms(); 
             renderCircuits(); 
+            renderDidacticMemory(); 
             renderBOM(); 
         }
 
-        // Recalcula potências das TUGs baseado na NBR 5410
-        function recalcAllTUGs() { 
-            const pf = Project.settings?.globalPF || 0.92;
-            Project.rooms.forEach(r => { 
-                if(!r.type) return; 
-                let tugs = r.items.filter(i => i.type === 'outlet'); 
-                const rule = NBR.TUG_RULES[r.type] || NBR.TUG_RULES.living; 
-                tugs.forEach((t, idx) => { 
-                    if(t.customVA) { t.va = t.customVA; } // Usa VA customizado se existir
-                    else { // Senão, aplica a regra da NBR
-                        if(rule.limit > 0) t.va = (idx < rule.limit) ? rule.base : (rule.extra || 100); 
-                        else t.va = rule.base; 
-                    } 
-                    t.power = Math.round(t.va * (t.pf || pf)); 
-                }); 
-            }); 
+        function calculateServiceEntrance(amps) {
+            let breaker = 0;
+            let cable = 0;
+
+            if (amps <= 40) { breaker = 40; cable = 10; }
+            else if (amps <= 50) { breaker = 50; cable = 10; } 
+            else if (amps <= 63) { breaker = 63; cable = 16; }
+            else if (amps <= 80) { breaker = 80; cable = 25; }
+            else if (amps <= 100) { breaker = 100; cable = 35; }
+            else if (amps <= 125) { breaker = 125; cable = 50; }
+            else { breaker = 150; cable = 70; } 
+
+            return { breaker, cable };
         }
 
-        // Renderiza a lista de cômodos
-        function renderRooms() {
-            const grid = document.getElementById('rooms-grid'); grid.innerHTML = '';
-            // Filtra cômodos pelo andar selecionado
-            const filtered = currentFloorFilter === 'all' ? Project.rooms : Project.rooms.filter(r => r.floor === currentFloorFilter);
-            filtered.forEach(r => {
-                const itemsHtml = r.items.map(i => {
-                     let detail = ''; if(i.type==='outlet' || i.type==='switch') detail = `${i.modules||1} Seções`; if(i.isThreeWay) detail = 'Three-Way';
-                     let icon = '💡';
-                     switch(i.type) {
-                        case 'outlet': icon = '🔌'; break;
-                        case 'outlet20': icon = '🛑'; break;
-                        case 'switch': icon = '🔘'; break;
-                        case 'equipment': icon = (i.name.includes('Chuveiro') ? '🚿' : (i.name.includes('Cooktop') ? '🔥' : (i.name.includes('Forno') ? '🍳' : '❄️') ) ); break;
-                     }
-                     
-                     // Lógica de exibição de potência customizada
-                     let powerDisplay = `${i.va || '?'}VA`;
-                     if (i.name.includes('Chuveiro')) { 
-                         powerDisplay = `${Math.round(i.va * (i.pf || 1.0))}W`; 
-                     } else if (i.name.includes('Ar Condicionado')) { 
-                         powerDisplay = `${Math.round(i.va * (i.pf || 0.92))}W`; 
-                     } else if (i.name.includes('Cooktop') || i.name.includes('Forno') || i.name.includes('Lavar') || i.name.includes('Lava-Louças')) {
-                         powerDisplay = `${Math.round(i.va * (i.pf || 1.0))}W`; 
-                     }
-
-                     // HTML para cada item (tomada, iluminação, etc)
-                     return `<div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 group"><div class="flex items-center gap-2"><div class="text-lg">${icon}</div><div><div class="flex items-center gap-1"><p class="text-xs font-bold text-slate-700 leading-none">${i.name}</p>${getCircuitBadge(i.circuitId)}</div><div class="flex items-center gap-1 mt-0.5"><button onclick="window.app.editItem(${r.id}, ${i.id})" class="text-[9px] font-mono text-indigo-600 bg-indigo-50 px-1 rounded hover:bg-indigo-100">${powerDisplay} ${detail} ✏️</button></div></div></div><button onclick="window.app.delItem(${r.id}, ${i.id})" class="text-slate-300 hover:text-red-500 p-1">✕</button></div>`;
-                }).join('');
-                // HTML para o card do cômodo
-                grid.innerHTML += `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 card-hover relative"><div class="flex justify-between items-start mb-2"><div><span class="text-[9px] uppercase font-bold tracking-wider bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${r.floor}</span><h3 class="font-bold text-lg text-slate-800 fun-font">${r.name}</h3></div><button onclick="window.app.modalAddItem(${r.id})" class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 font-bold">+</button></div><div class="space-y-1">${itemsHtml || '<div class="text-center text-xs text-slate-300 italic py-4">Vazio</div>'}</div></div>`;
-            });
+        function getIconForType(type, name) {
+            const n = name.toLowerCase();
+            if (type === 'light') return '💡';
+            if (type === 'outlet') return '🔌';
+            
+            if (n.includes('chuveiro')) return '🚿';
+            if (n.includes('ar') && (n.includes('cond') || n.includes('split'))) return '❄️';
+            if (n.includes('forno') || n.includes('fogão') || n.includes('cooktop')) return '🍳';
+            if (n.includes('lava') || n.includes('roupa') || n.includes('secadora')) return '🧺';
+            if (n.includes('louça')) return '🍽️';
+            if (n.includes('geladeira') || n.includes('freezer')) return '🧊';
+            if (n.includes('tv') || n.includes('televisão')) return '📺';
+            if (n.includes('micro')) return '🍲';
+            if (n.includes('computador') || n.includes('pc')) return '💻';
+            
+            return '🔌'; 
         }
 
-        // Renderiza a aba de cálculos (Circuitos e Geral)
-        function renderCircuits() {
-            const qdT = document.getElementById('list-qd-terreo'); const qdS = document.getElementById('list-qd-superior'); qdT.innerHTML = ''; qdS.innerHTML = '';
-            let loadsW = { r:0, s:0, t:0 }; let loadsVA = { r:0, s:0, t:0 }; // Cargas por fase (INSTALADA)
-            const globalPF = Project.settings?.globalPF || 0.92;
+        function calculateDemand() {
+            let loads = { d1_light:0, d1_tug:0, d2_shower:{w:0, c:0}, d3_wash:{w:0, c:0}, d4_cook:{w:0, c:0}, d5_ac:{w:0, c:0}, d_other:0 };
+            let loadsByPhase = { r:0, s:0, t:0 };
             
-            // Calcula a carga total de cada circuito (para balanceamento)
-            Project.circuits.forEach(c => {
-                let va = 0; Project.rooms.forEach(r => r.items.forEach(i => { if(i.circuitId == c.id) va += (i.va || 0); }));
-                const pf = c.pf || (c.usage === 'lighting' ? 1.0 : globalPF);
-                const watts = va * pf;
-                const finalAmps = c.customAmp > 0 ? c.customAmp : (va / NBR.VOLTAGE); // Usa corrente customizada (chuveiro) ou calcula
-                if(loadsW[c.phase] !== undefined) { loadsW[c.phase] += watts; loadsVA[c.phase] += va; }
-                
-                // HTML para o card do circuito
-                const html = `<div class="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm group"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white uppercase ${c.phase==='r'?'bg-phase-r':c.phase==='s'?'bg-phase-s':'bg-phase-t'}">${c.phase}</div><div><p class="text-sm font-bold text-slate-700 leading-none">${c.name}</p><p class="text-[10px] text-slate-400 font-mono mt-0.5">${va}VA (FP ${pf}) • ${finalAmps.toFixed(1)}A • ${c.gauge}mm² • ${c.dist||15}m</p></div></div><div class="flex gap-1"><button onclick="window.app.editCircuit(${c.id})" class="bg-slate-100 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded">✏️</button><button onclick="window.app.delCirc(${c.id})" class="text-slate-300 hover:text-red-500 px-2">✕</button></div></div>`;
-                if(c.qd === 'terreo') qdT.innerHTML += html; else qdS.innerHTML += html;
-            });
-            
-            // Atualiza balanceamento de fases (Carga Instalada)
-            const totalW_Installed = loadsW.r + loadsW.s + loadsW.t;
-            const totalVA_Installed = loadsVA.r + loadsVA.s + loadsVA.t;
-            const ampsR = loadsVA.r / 220;
-            const ampsS = loadsVA.s / 220;
-            const ampsT = loadsVA.t / 220;
-            document.getElementById(`load-r-w`).innerText = Math.round(loadsW.r) + ' W'; document.getElementById(`load-r-a`).innerText = ampsR.toFixed(1) + ' A';
-            document.getElementById(`load-s-w`).innerText = Math.round(loadsW.s) + ' W'; document.getElementById(`load-s-a`).innerText = ampsS.toFixed(1) + ' A';
-            document.getElementById(`load-t-w`).innerText = Math.round(loadsW.t) + ' W'; document.getElementById(`load-t-a`).innerText = ampsT.toFixed(1) + ' A';
-
-
-            // ### V15 - NOVO CÁLCULO DE DEMANDA GERAL ###
-            
-            // 1. Coletar cargas instaladas por grupo (em Watts)
-            let installedLoadsW = { d1_light: 0, d1_tug: 0, d2_shower: 0, d3_wash: 0, d4_cook: 0, d5_ac: 0, d_other: 0 };
             Project.rooms.forEach(r => {
                 r.items.forEach(i => {
-                    const watts = i.va * (i.pf || (i.type === 'outlet' ? globalPF : 1.0)); // TUGs usam PF global, resto usa PF próprio ou 1.0
-                    
-                    if (i.type === 'light') { installedLoadsW.d1_light += watts; }
-                    else if (i.type === 'outlet' || i.type === 'outlet20') { installedLoadsW.d1_tug += watts; }
-                    else if (i.name.includes('Chuveiro')) { installedLoadsW.d2_shower += watts; }
-                    else if (i.name.includes('Lava-Louças') || i.name.includes('Máquina Lavar')) { installedLoadsW.d3_wash += watts; }
-                    else if (i.name.includes('Cooktop') || i.name.includes('Forno Elétrico')) { installedLoadsW.d4_cook += watts; }
-                    else if (i.name.includes('Ar Condicionado')) { installedLoadsW.d5_ac += watts; }
-                    else if (i.type === 'equipment') { installedLoadsW.d_other += watts; } // Outros equipamentos
+                    const circ = Project.circuits.find(c => c.id == i.circuitId);
+                    const watts = i.va * (i.pf || 0.92);
+                    if(circ) loadsByPhase[circ.phase] += watts;
+
+                    if (i.type === 'light') loads.d1_light += watts;
+                    else if (i.type === 'outlet') loads.d1_tug += watts;
+                    else if (i.name.toLowerCase().includes('chuveiro')) { loads.d2_shower.w += watts; loads.d2_shower.c++; }
+                    else if (i.name.toLowerCase().includes('lava') || i.name.toLowerCase().includes('micro')) { loads.d3_wash.w += watts; loads.d3_wash.c++; }
+                    else if (i.name.toLowerCase().includes('forno') || i.name.toLowerCase().includes('fogão') || i.name.toLowerCase().includes('cooktop')) { loads.d4_cook.w += watts; loads.d4_cook.c++; }
+                    else if (i.name.toLowerCase().includes('ar')) { loads.d5_ac.w += watts; loads.d5_ac.c++; }
+                    else loads.d_other += watts;
                 });
             });
 
-            // 2. Aplicar fatores de demanda para obter d(KW)
-            const d1_total_W = installedLoadsW.d1_light + installedLoadsW.d1_tug + installedLoadsW.d_other;
-            const d1_kw = (d1_total_W * 0.27) / 1000;
-            const d2_kw = (installedLoadsW.d2_shower * 0.66) / 1000;
-            const d3_kw = (installedLoadsW.d3_wash * 0.70) / 1000;
-            const d4_kw = (installedLoadsW.d4_cook * 0.60) / 1000;
-            const d5_kw = (installedLoadsW.d5_ac * 0.76) / 1000;
-            
-            const d_KW_total = d1_kw + d2_kw + d3_kw + d4_kw + d5_kw; // Demanda Ativa Total (kW)
-            const totalDemandW = d_KW_total * 1000; // Demanda Ativa Total (W)
+            const d1_tot = (loads.d1_light + loads.d1_tug + loads.d_other) / 1000;
+            let fd1 = 0.86;
+            if(d1_tot > 1) fd1 = 0.75; if(d1_tot > 2) fd1 = 0.66; if(d1_tot > 3) fd1 = 0.59; if(d1_tot > 4) fd1 = 0.52;
+            if(d1_tot > 5) fd1 = 0.45; if(d1_tot > 6) fd1 = 0.40; if(d1_tot > 7) fd1 = 0.35; if(d1_tot > 8) fd1 = 0.31;
+            if(d1_tot > 9) fd1 = 0.27; if(d1_tot > 10) fd1 = 0.24;
 
-            // 3. Calcular Demanda Aparente Total D(KVA)
-            const D_KVA_total = d_KW_total / 0.92;
-            const totalDemandVA = D_KVA_total * 1000;
+            let fd2 = 1.0; if(loads.d2_shower.c==2) fd2=0.75; else if(loads.d2_shower.c==3) fd2=0.70; else if(loads.d2_shower.c>=4) fd2=0.66;
+            let fd3 = 1.0; if(loads.d3_wash.c>=2 && loads.d3_wash.c<=4) fd3=0.70;
+            let fd4 = 1.0; if(loads.d4_cook.c==2) fd4=0.60; if(loads.d4_cook.c==3) fd4=0.48;
+            let fd5 = 1.0; if(loads.d5_ac.c>=2) fd5=0.88;
 
-            // 4. Calcular Corrente do Disjuntor Geral (Amperes)
-            // I = P(W) / (V_linha * sqrt(3) * FP) = (d_KW_total * 1000) / (380 * 1.73 * 0.92)
-            const I_geral_A = totalDemandW / (1.732 * 0.92 * 380); // Aprox 603.85
+            const totalDemandaKW = (d1_tot * fd1) + ((loads.d2_shower.w/1000) * fd2) + ((loads.d3_wash.w/1000) * fd3) + ((loads.d4_cook.w/1000) * fd4) + ((loads.d5_ac.w/1000) * fd5);
+            const totalDemandaKVA = totalDemandaKW / 0.92;
+            const amps = (totalDemandaKW * 1000) / (1.732 * 380 * 0.92);
 
-            // 5. Dimensionar Disjuntor e Cabo Geral
-            const breakers = [10, 16, 20, 25, 32, 40, 50, 63, 70, 80, 100, 125, 150, 175, 200, 225];
-            let mainBreaker = breakers.find(b => b >= I_geral_A) || 225;
-            
-            let mainCable = '10.0';
-            if (I_geral_A > 50) mainCable = '16.0';
-            if (I_geral_A > 63) mainCable = '25.0';
-            if (I_geral_A > 80) mainCable = '35.0';
-            if (I_geral_A > 100) mainCable = '50.0';
-            if (I_geral_A > 125) mainCable = '70.0';
-            if (I_geral_A > 150) mainCable = '95.0';
-            if (I_geral_A > 175) mainCable = '120.0';
-            if (I_geral_A > 200) mainCable = '150.0';
+            const entrance = calculateServiceEntrance(amps);
 
-            // 6. Atualiza painel geral
-            document.getElementById('gen-breaker').innerText = mainBreaker + ' A';
-            const effectiveDemandFactor = totalDemandVA / totalVA_Installed;
-            document.getElementById('gen-demand-factor').innerText = `Demanda: ${Math.round(effectiveDemandFactor * 100)}%`;
-            document.getElementById('gen-cable').innerText = mainCable + ' mm²';
-            document.getElementById('gen-dist').innerText = `Dist: ${Project.mainParams?.dist || 20} m`;
-            document.getElementById('gen-load-w').innerText = Math.round(totalDemandW) + ' W';
-            document.getElementById('gen-load-va-demand').innerText = Math.round(totalDemandVA) + ' VA';
-            document.getElementById('gen-load-va-total').innerText = `Instal.: ${Math.round(totalVA_Installed)} VA`; // Mostra VA total instalado
-            
-            // 7. Salva parâmetros globais para uso na lista de materiais
-            window.calcParams = { mainBreaker, mainCable, maxAmp: I_geral_A };
+            return { loads, loadsByPhase, factors: { fd1, fd2, fd3, fd4, fd5 }, totalDemandaKW, totalDemandaKVA, amps, entrance };
         }
 
-        // Renderiza a lista de materiais (BOM) e orçamento
-        function renderBOM() {
-            const bomItems = document.getElementById('bom-items'); const bomCables = document.getElementById('bom-cables'); const tb = document.getElementById('budget-tbody');
-            // Contadores de materiais
-            let tug = { '1':0, '2':0, '3':0 }; let tue = { '20a':0, 'eqp':0 }; let sw = { '1':0, '2':0, '3':0, '3w':0 }; let lights = 0; let brk = Project.circuits.length;
-            let cableColors = {
-                'r': { name: 'Fase R (Vermelho)', class: 'bg-red-500', items: {} },
-                's': { name: 'Fase S (Preto)', class: 'bg-slate-900', items: {} },
-                't': { name: 'Fase T (Amarelo)', class: 'bg-yellow-400 text-black', items: {} },
-                'n': { name: 'Neutro (Azul)', class: 'bg-blue-500', items: {} },
-                'pe': { name: 'Terra (Verde)', class: 'bg-green-500', items: {} }
+        function renderRooms() {
+            const grid = document.getElementById('rooms-grid'); grid.innerHTML = '';
+            const filtered = currentFloorFilter === 'all' ? Project.rooms : Project.rooms.filter(r => r.floor === currentFloorFilter);
+            filtered.forEach(r => {
+                const itemsHtml = r.items.map(i => {
+                     const circ = Project.circuits.find(c => c.id == i.circuitId);
+                     const cBadge = circ ? `<span class="text-[9px] font-bold px-1 rounded ml-1 border ${circ.phase=='r'?'text-red-600 border-red-200 bg-red-50':(circ.phase=='s'?'text-slate-800 border-slate-300 bg-slate-50':'text-yellow-600 border-yellow-200 bg-yellow-50')}">C${Project.circuits.indexOf(circ)+1}</span>` : '<span class="text-[9px] text-red-500 font-bold ml-1">🚫</span>';
+                     const icon = getIconForType(i.type, i.name);
+                     return `<div class="flex justify-between items-center py-1.5 border-b border-slate-50 last:border-0"><div class="flex items-center gap-1 text-sm text-slate-700"><span>${icon}</span><span>${i.name}</span>${cBadge}<span class="text-[9px] text-slate-400 font-mono ml-1">${i.va}VA</span></div><div class="flex gap-1"><button onclick="window.app.editItem(${r.id},${i.id})" class="text-[10px] text-blue-400">✏️</button><button onclick="window.app.delItem(${r.id},${i.id})" class="text-[10px] text-red-300 hover:text-red-500">✕</button></div></div>`;
+                }).join('');
+                
+                grid.innerHTML += `
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-[9px] uppercase font-bold tracking-wider bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${r.floor}</span>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-slate-800">${r.name}</h3>
+                                <button onclick="window.app.editRoom(${r.id})" class="text-[10px] text-blue-500 hover:underline">✏️</button>
+                                <button onclick="window.app.delRoom(${r.id})" class="text-[12px] text-red-300 hover:text-red-600 ml-2" title="Excluir Cômodo">🗑️</button>
+                            </div>
+                            <p class="text-[10px] text-slate-400">A: <b>${r.area||0}m²</b></p>
+                        </div>
+                        <button onclick="window.app.modalAddItem(${r.id})" class="w-6 h-6 rounded bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 flex items-center justify-center">+</button>
+                    </div>
+                    <div class="space-y-1">${itemsHtml || '<p class="text-xs text-slate-300 italic py-2">Vazio</p>'}</div>
+                </div>`;
+            });
+        }
+
+        function renderCircuits() {
+            const c = CALCULATED_DATA;
+            const setLoad = (ph, w) => {
+                 document.getElementById(`load-${ph}-w`).innerText = Math.round(w) + ' W';
+                 document.getElementById(`load-${ph}-a`).innerText = (w/220).toFixed(1) + ' A';
             };
+            setLoad('r', c.loadsByPhase.r); setLoad('s', c.loadsByPhase.s); setLoad('t', c.loadsByPhase.t);
 
-            // Conta tomadas, interruptores, etc.
-            Project.rooms.forEach(r => r.items.forEach(i => {
-                if(i.type==='outlet') { let m = i.modules || 1; if(tug[m] !== undefined) tug[m]++; }
-                else if(i.type==='outlet20') { tue['20a']++; }
-                else if(i.type==='equipment') { tue['eqp']++; }
-                else if(i.type==='switch') { if(i.isThreeWay) sw['3w']++; else { let m = i.modules || 1; if(sw[m] !== undefined) sw[m]++; } }
-                else if(i.type==='light') lights++;
-            }));
-
-            // Calcula metragem de cabos por circuito (F+N+T)
-            Project.circuits.forEach(c => {
-                const dist = (Number(c.dist)||15) * 1.1; const g = c.gauge; // Distância + 10%
-                if(!cableColors[c.phase].items[g]) cableColors[c.phase].items[g] = 0; cableColors[c.phase].items[g] += dist;
-                if(!cableColors['n'].items[g]) cableColors['n'].items[g] = 0; cableColors['n'].items[g] += dist;
-                if(!cableColors['pe'].items[g]) cableColors['pe'].items[g] = 0; cableColors['pe'].items[g] += dist;
-            });
-
-            // Adiciona cabos de entrada (F+F+F+N+T)
-            const mainDist = (Project.mainParams?.dist || 20) * 1.1;
-            const mainGauge = window.calcParams?.mainCable || '10.0';
-            ['r','s','t','n','pe'].forEach(k => { if(!cableColors[k].items[mainGauge]) cableColors[k].items[mainGauge] = 0; cableColors[k].items[mainGauge] += mainDist; });
-
-            // Renderiza cards de cabos
-            bomCables.innerHTML = '';
-            Object.keys(cableColors).forEach(k => {
-                const color = cableColors[k]; const entries = Object.entries(color.items); if(entries.length === 0) return;
-                let listHtml = entries.map(([g, len]) => `<div class="flex justify-between text-xs border-b border-slate-100 py-1 last:border-0"><span class="font-mono text-slate-500">${g}mm²</span><span class="font-bold text-slate-700">${Math.ceil(len)}m</span></div>`).join('');
-                bomCables.innerHTML += `<div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm"><div class="${color.class} px-3 py-2 text-xs font-bold text-white flex justify-between items-center"><span>${color.name}</span><span>🏳️</span></div><div class="p-3 space-y-1">${listHtml}</div></div>`;
-            });
-
-            // Renderiza cards de itens gerais
-            bomItems.innerHTML = `
-                <div class="bg-white rounded-xl p-4 border border-slate-200">
-                    <h4 class="font-bold text-indigo-800 text-xs uppercase mb-3">Itens Gerais</h4>
-                    <div class="space-y-1.5 text-xs text-slate-600">
-                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>Disjuntor Geral</span><b>${window.calcParams?.mainBreaker}A</b></div>
-                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>Dispositivo DR</span><b>${window.calcParams?.mainBreaker}A</b></div>
-                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>Cabo Entrada</span><b>${window.calcParams?.mainCable}mm</b></div>
-                        <div class="flex justify-between text-slate-400"><span>Distância Geral</span><b>${Project.mainParams?.dist}m</b></div>
+            const qdT = document.getElementById('list-qd-terreo'); const qdS = document.getElementById('list-qd-superior'); qdT.innerHTML = ''; qdS.innerHTML = '';
+            Project.circuits.forEach((circ, idx) => {
+                let circVa = 0; Project.rooms.forEach(r => r.items.forEach(i => { if(i.circuitId == circ.id) circVa += (i.va || 0); }));
+                const html = `
+                <div class="flex justify-between items-center p-2 bg-white rounded border border-slate-100 shadow-sm text-sm">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white uppercase ${circ.phase==='r'?'bg-phase-r':circ.phase==='s'?'bg-phase-s':'bg-phase-t'}">C${idx+1}</div>
+                        <div><p class="font-bold text-slate-700 leading-none">${circ.name}</p><p class="text-[10px] text-slate-400 font-mono">${circVa}VA • ${circ.gauge}mm²</p></div>
                     </div>
-                </div>
-                <div class="bg-white rounded-xl p-4 border border-slate-200">
-                    <h4 class="font-bold text-slate-800 text-xs uppercase mb-3">Interruptores</h4>
-                    <div class="space-y-1.5 text-xs text-slate-600">
-                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>1 Tecla</span><b>${sw[1]}</b></div>
-                        <div class="flex justify-between border-b border-slate-50 pb-1"><span>2 Teclas</span><b>${sw[2]}</b></div>
-                        <div class="flex justify-between pt-1 text-indigo-600 font-bold"><span>3-Way</span><b>${sw['3w']}</b></div>
+                    <button onclick="window.app.delCirc(${circ.id})" class="text-slate-300 hover:text-red-500">✕</button>
+                </div>`;
+                if(circ.qd === 'terreo') qdT.innerHTML += html; else qdS.innerHTML += html;
+            });
+        }
+
+        function getRoomCalculationHTML(room) {
+            let lightTxt = "";
+            let area = room.area;
+            if (area <= 6) {
+                lightTxt = `Área ${area}m² ≤ 6m² → <span class="calc-highlight">100 VA</span> (Mínimo).`;
+            } else {
+                let whole4 = Math.floor((area - 6) / 4);
+                let lightVA = 100 + (whole4 * 60);
+                lightTxt = `Área ${area}m² > 6m² (100VA + ${whole4}x60VA) = <span class="calc-highlight">${lightVA} VA</span>.`;
+            }
+
+            let tugTxt = "";
+            let p = Math.sqrt(area) * 4; 
+            let pStr = p.toFixed(1);
+
+            if (room.type === 'bathroom') {
+                tugTxt = `Banheiro: <span class="calc-highlight">1 x 600 VA</span> (lavatório).`;
+            } else if (room.type === 'kitchen') {
+                let qtd = Math.ceil(p / 3.5);
+                tugTxt = `Cozinha (~${pStr}m): ${qtd} tomadas (3x <span class="calc-highlight">600VA</span>).`;
+            } else {
+                if (area < 6) tugTxt = `Área < 6m²: 1x <span class="calc-highlight">100 VA</span>.`;
+                else {
+                    let qtd = Math.ceil(p / 5);
+                    tugTxt = `Sala/Quarto (~${pStr}m): ${qtd}x <span class="calc-highlight">100 VA</span>.`;
+                }
+            }
+
+            return `
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-bold text-slate-800">${room.name}</h4>
+                        <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold uppercase text-slate-500">${room.area}m²</span>
                     </div>
+                    <div class="text-xs text-slate-500 mb-1">💡 <b class="text-slate-700">Iluminação:</b></div>
+                    <div class="calc-box mb-3">${lightTxt}</div>
+                    <div class="text-xs text-slate-500 mb-1">🔌 <b class="text-slate-700">Tomadas:</b></div>
+                    <div class="calc-box">${tugTxt}</div>
                 </div>
             `;
-
-            // Renderiza tabela de orçamento
-            tb.innerHTML = ''; let total = 0;
-            const addRow = (label, qty, priceKey) => { if(qty <= 0) return; const price = Project.prices[priceKey] || 0; const sub = qty * price; total += sub; tb.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-3 text-slate-700 whitespace-nowrap">${label}</td><td class="p-3 text-center font-bold text-slate-500">${qty}</td><td class="p-3 text-right"><button onclick="window.app.editPrice('${priceKey}')" class="text-indigo-600 text-xs font-bold bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">R$ ${price.toFixed(2)}</button></td><td class="p-3 text-right font-bold whitespace-nowrap">R$ ${sub.toFixed(2)}</td></tr>`; };
-
-            addRow(`Disjuntor Geral Tripolar ${window.calcParams?.mainBreaker}A`, 1, 'breakerMain');
-            addRow(`Dispositivo DR Tetrapolar ${window.calcParams?.mainBreaker}A`, 1, 'dr');
-            addRow('Disjuntor DIN Monopolar (Circuitos)', brk, 'breaker');
-            addRow('Quadro Distribuição', 2, 'board');
-            addRow('Tomada (Conj. 1 módulo)', tug[1], 'outlet');
-            addRow('Tomada (Conj. 2 módulos)', tug[2], 'outlet2');
-            addRow('Tomada (Conj. 3 módulos)', tug[3], 'outlet3');
-            addRow('Tomada 20A (Específica)', tue['20a'], 'outlet20');
-            addRow('Saída Fio (Chuveiro/Ar/Etc)', tue['eqp'], 'equipment');
-            addRow('Interruptor (1 Tecla)', sw[1], 'switch');
-            addRow('Interruptor (2 Teclas)', sw[2], 'switch2');
-            addRow('Interruptor (3 Teclas)', sw[3], 'switch3');
-            addRow('Interruptor Three-Way', sw['3w'], 'switch3w');
-            addRow('Ponto de Luz', lights, 'light');
-            // Adiciona cabos ao orçamento
-            Object.keys(cableColors).forEach(colorKey => {
-                const colorData = cableColors[colorKey]; const colorName = colorData.name.split(' (')[0]; const colorLabelMap = { 'r': 'Vermelho', 's': 'Preto', 't': 'Amarelo', 'n': 'Azul', 'pe': 'Verde' };
-                Object.entries(colorData.items).forEach(([gauge, length]) => { if (length > 0) addRow(`Cabo ${gauge}mm² ${colorLabelMap[colorKey]} (${colorName})`, Math.ceil(length), `cable${gauge}`); });
-            });
-            document.getElementById('budget-total').innerText = total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
         }
 
-        // Helper para obter o badge do circuito
-        function getCircuitBadge(id) { const c = Project.circuits.find(x => x.id == id); return c ? `<span class="text-[9px] font-bold ${c.phase==='r'?'text-red-500':c.phase==='s'?'text-slate-900':'text-yellow-600'} bg-slate-50 px-1 border rounded ml-1">C${Project.circuits.indexOf(c)+1}</span>` : ''; }
+        function renderDidacticMemory() {
+            const container = document.getElementById('calc-steps-content');
+            const roomContainer = document.getElementById('room-calc-container');
+            
+            if(!CALCULATED_DATA) return;
+            const c = CALCULATED_DATA;
 
-        // Objeto global 'app' com todas as funções de interação
+            document.getElementById('img-formula').src = USER_IMAGES[0];
+            document.getElementById('img-didatico-luz').src = USER_IMAGES[9];
+            document.getElementById('img-didatico-tug').src = USER_IMAGES[8];
+            document.getElementById('img-tab4-1').src = USER_IMAGES[1];
+            document.getElementById('img-tab4-2').src = USER_IMAGES[2];
+
+            roomContainer.innerHTML = '';
+            Project.rooms.forEach(room => { roomContainer.innerHTML += getRoomCalculationHTML(room); });
+
+            const createCard = (title, code, itemsCount, installedW, factor, imgUrl) => `
+                <div class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 flex flex-col md:flex-row">
+                    <div class="flex-1 p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${code}</span>
+                            <h3 class="text-lg font-bold text-slate-800">${title}</h3>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg mb-4 space-y-2">
+                            <div class="flex justify-between text-sm"><span class="text-slate-500">Qtd:</span><span class="font-bold">${itemsCount}</span></div>
+                            <div class="flex justify-between text-sm"><span class="text-slate-500">Instalada:</span><span class="font-bold text-slate-800">${(installedW/1000).toFixed(2)} kW</span></div>
+                            <div class="flex justify-between text-sm items-center"><span class="text-slate-500">Fator:</span><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">${factor}</span></div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-slate-400 uppercase font-bold">Demanda Parcial</p>
+                            <p class="text-2xl font-bold text-indigo-700">${(installedW/1000 * factor).toFixed(2)} kW</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-100 p-4 md:w-64 flex flex-col justify-center items-center border-l border-slate-200">
+                        <p class="text-[10px] uppercase text-slate-400 font-bold mb-2">Referência</p>
+                        <img src="${imgUrl}" class="norm-img" alt="Tabela" onclick="window.open(this.src, '_blank')">
+                    </div>
+                </div>`;
+
+            const d1W = c.loads.d1_light + c.loads.d1_tug + c.loads.d_other;
+            const htmlD1 = createCard("Iluminação e TUGs", "d1", "Vários", d1W, c.factors.fd1, USER_IMAGES[3]);
+            const htmlD2 = createCard("Aquecimento", "d2", c.loads.d2_shower.c + " un", c.loads.d2_shower.w, c.factors.fd2, USER_IMAGES[4]);
+            const htmlD3 = createCard("Serviço", "d3", c.loads.d3_wash.c + " un", c.loads.d3_wash.w, c.factors.fd3, USER_IMAGES[5]);
+            const htmlD4 = createCard("Cozinha", "d4", c.loads.d4_cook.c + " un", c.loads.d4_cook.w, c.factors.fd4, USER_IMAGES[6]);
+            const htmlD5 = createCard("Ar Condicionado", "d5", c.loads.d5_ac.c + " un", c.loads.d5_ac.w, c.factors.fd5, USER_IMAGES[7]);
+
+            const currentCalcHTML = `
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Cálculo da Corrente e Disjuntor Geral</h3>
+                <div class="text-sm text-slate-600 mb-4">
+                    Para dimensionar o disjuntor geral, calculamos a corrente nominal ($I$) baseada na Demanda Total ($S$) em kVA e na tensão de linha ($V_{linha}$) de 380V (trifásico padrão JP).
+                </div>
+                <div class="text-center bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <div class="math-display">$$I = \\frac{S_{total} \\times 1000}{\\sqrt{3} \\times V_{linha}}$$</div>
+                    <div class="math-display">$$I = \\frac{${c.totalDemandaKVA.toFixed(2)} \\times 1000}{1.732 \\times 380}$$</div>
+                    <div class="math-display">$$I \\approx ${c.amps.toFixed(2)} \\text{ A}$$</div>
+                </div>
+                <div class="mt-4 text-sm text-slate-500">
+                    <p>O disjuntor comercial escolhido deve ser o valor imediatamente superior à corrente calculada (${c.amps.toFixed(1)} A). Neste caso: <b>${c.entrance.breaker} A</b>.</p>
+                </div>
+            </div>`;
+
+            const resultHTML = `
+                <div class="bg-slate-900 text-white rounded-2xl p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 mb-8">
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-yellow-400 fun-font mb-2">Resultado</h3>
+                        <p class="text-slate-300 text-sm mb-6">Demanda total (kW) convertida para kVA.</p>
+                        <div class="space-y-2 font-mono text-sm text-slate-400">
+                            <p>d(kW) = ${(c.totalDemandaKW).toFixed(2)} kW</p>
+                            <p>D(kVA) = ${c.totalDemandaKVA.toFixed(2)} / 0,92</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/10 p-6 rounded-xl text-center backdrop-blur-sm border border-white/20">
+                        <p class="text-xs uppercase font-bold text-slate-300 mb-1">Demanda Total</p>
+                        <p class="text-4xl font-black text-white">${c.totalDemandaKVA.toFixed(2)} kVA</p>
+                        <p class="text-xs text-green-400 mt-2 font-bold">~${c.amps.toFixed(1)} A</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Dimensionamento Ramal de Entrada</h3>
+                    <div class="flex flex-col md:flex-row gap-6 items-center">
+                        <div class="flex-1 space-y-4">
+                            <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                                <p class="text-xs text-slate-500 uppercase font-bold mb-1">Disjuntor Geral Recomendado</p>
+                                <p class="text-2xl font-black text-indigo-700">${c.entrance.breaker} A <span class="text-sm font-normal text-slate-500">(Tripolar)</span></p>
+                            </div>
+                            <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                                <p class="text-xs text-slate-500 uppercase font-bold mb-1">Cabo de Entrada (Fase)</p>
+                                <p class="text-2xl font-black text-indigo-700">${c.entrance.cable} mm²</p>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 text-center">
+                            <img src="${USER_IMAGES[10]}" class="norm-img h-48 w-full object-contain bg-slate-50" onclick="window.open(this.src, '_blank')">
+                            <p class="text-[10px] text-slate-400 mt-2">Baseado na tabela da concessionária local</p>
+                        </div>
+                    </div>
+                </div>`;
+
+            container.innerHTML = htmlD1 + htmlD2 + htmlD3 + htmlD4 + htmlD5 + currentCalcHTML + resultHTML;
+            
+            if(window.MathJax) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function renderBOM() {
+             const tbody = document.getElementById('bom-table-body'); tbody.innerHTML = '';
+             const prices = Project.prices || JP_PRICES;
+             const c = CALCULATED_DATA;
+             
+             let items = { 
+                 breaker_1: Project.circuits.filter(c => c.phase.length === 1).length || 0, 
+                 breaker_3: 1, 
+                 idr: 1,
+                 outlet: 0, 
+                 light_point: 0,
+                 switch: 0,
+                 cable_15: 0, cable_25: 0, cable_40: 0, cable_60: 0
+             };
+
+             Project.rooms.forEach(r => {
+                 r.items.forEach(i => {
+                     if(i.type==='outlet' || i.type==='equipment') items.outlet++;
+                     if(i.type==='light') { items.light_point++; items.switch++; }
+                 });
+             });
+
+             Project.circuits.forEach(c => {
+                 const len = (c.dist || 15) * 2.5;
+                 if(c.gauge == '1.5') items.cable_15 += len;
+                 else if(c.gauge == '2.5') items.cable_25 += len;
+                 else if(c.gauge == '4.0') items.cable_40 += len;
+                 else items.cable_60 += len;
+             });
+
+             let totalCost = 0;
+
+             const addRow = (key, name, qty, isCable) => {
+                 if(qty <= 0) return;
+                 const p = prices[key] || 0;
+                 const t = qty * p;
+                 totalCost += t;
+                 tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-medium text-slate-700 text-xs whitespace-nowrap">${name}</td>
+                        <td class="p-3 text-center text-slate-500 text-xs">${Math.ceil(qty)} ${isCable?'m':'un'}</td>
+                        <td class="p-3 text-right"><input type="number" step="0.10" class="price-input" value="${p.toFixed(2)}" onchange="window.app.updatePrice('${key}', this.value)"></td>
+                        <td class="p-3 text-right font-bold text-slate-700 text-xs">R$ ${t.toFixed(2)}</td>
+                    </tr>`;
+             };
+
+             const entranceCableQty = 15 * 4; 
+             const entranceCablePrice = c.entrance.cable > 10 ? 15.00 : 8.00; 
+
+             addRow('breaker_1', 'Disjuntor Monopolar (DIN)', items.breaker_1);
+             addRow('breaker_3', `Disjuntor Geral Tripolar ${c.entrance.breaker}A`, items.breaker_3);
+             addRow('idr', 'IDR Tetrapolar', items.idr);
+             addRow('outlet', 'Tomadas (Conjunto 4x2)', items.outlet);
+             addRow('light_point', 'Ponto de Luz (Octogonal+Bocal)', items.light_point);
+             addRow('switch', 'Interruptor Simples', items.switch);
+             addRow('cable_15', 'Cabo Flex 1.5mm²', items.cable_15, true);
+             addRow('cable_25', 'Cabo Flex 2.5mm²', items.cable_25, true);
+             addRow('cable_40', 'Cabo Flex 4.0mm²', items.cable_40, true);
+             addRow('cable_60', 'Cabo Flex 6.0mm²', items.cable_60, true);
+             
+             tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 bg-indigo-50/30">
+                    <td class="p-3 font-medium text-indigo-800 text-xs whitespace-nowrap">Cabo Entrada ${c.entrance.cable}mm² (Est.)</td>
+                    <td class="p-3 text-center text-slate-500 text-xs">${entranceCableQty} m</td>
+                    <td class="p-3 text-right"><input type="number" step="0.10" class="price-input" value="${entranceCablePrice.toFixed(2)}" disabled></td>
+                    <td class="p-3 text-right font-bold text-slate-700 text-xs">R$ ${(entranceCableQty * entranceCablePrice).toFixed(2)}</td>
+                </tr>`;
+             totalCost += (entranceCableQty * entranceCablePrice);
+
+             document.getElementById('bom-total-price').innerText = 'R$ ' + totalCost.toFixed(2);
+        }
+
         window.app = {
             closeModal: () => document.getElementById('generic-modal').classList.add('hidden'),
-            
-            // ### V15 - Modal de Config Simplificado ###
-            editSettings: () => {
-                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Configurações Globais";
+            updatePrice: (key, val) => {
+                if(!Project.prices) Project.prices = {};
+                Project.prices[key] = parseFloat(val);
+                saveCloud();
+            },
+            editRoom: (rid) => {
+                const r = Project.rooms.find(x => x.id === rid);
+                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Cômodo";
                 document.getElementById('g-modal-content').innerHTML = `
-                <label class="text-xs text-slate-500 block mb-1">Fator de Potência Padrão (FP)</label>
-                <input id="m-pf" type="number" step="0.01" class="w-full border p-2 rounded mb-3" value="${Project.settings?.globalPF || 0.92}">
-                <p class="text-[10px] text-slate-400 mt-1">O Fator de Demanda agora é calculado por grupos (d1 a d5) e não pode ser editado globalmente.</p>`;
+                    <div class="space-y-3">
+                        <input id="er-name" class="w-full border p-2 rounded" value="${r.name}">
+                        <label class="text-xs font-bold text-slate-500">Área (m²)</label>
+                        <input id="er-area" type="number" class="w-full border p-2 rounded" value="${r.area}">
+                    </div>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
-                document.getElementById('g-modal-confirm').onclick = () => { 
-                    Project.settings.globalPF = Number(document.getElementById('m-pf').value); 
-                    recalcAllTUGs(); saveCloud(); window.app.closeModal(); 
-                };
-            },
-            editMainParams: () => {
-                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Distância Padrão -> Quadro";
-                 document.getElementById('g-modal-content').innerHTML = `<label class="text-xs text-slate-500 block mb-1">Distância em Metros</label><input id="m-dist" type="number" class="w-full border p-2 rounded" value="${Project.mainParams?.dist || 20}">`;
-                 el.classList.remove('hidden'); el.classList.add('flex');
-                 document.getElementById('g-modal-confirm').onclick = () => { Project.mainParams = { dist: Number(document.getElementById('m-dist').value) }; saveCloud(); window.app.closeModal(); };
-            },
-            promptAddRoom: () => {
-                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Novo Ambiente";
-                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3">
-                    <input id="m-r-name" class="w-full border p-2 rounded text-sm" placeholder="Nome (Ex: Sala)">
-                    <select id="m-r-floor" class="w-full border p-2 rounded text-sm bg-white"><option value="terreo">Térreo</option><option value="superior">Superior</option><option value="subsolo">Subsolo</option></select>
-                    <select id="m-r-type" class="w-full border p-2 rounded text-sm bg-white font-bold text-indigo-700"><option value="living">🛋️ Sala / Quarto (100VA)</option><option value="kitchen">🍳 Cozinha (600VA)</option><option value="bathroom">🚿 Banheiro (600VA)</option><option value="external">🌿 Externo (100VA)</option></select>
-                    <input id="m-r-tugs" type="number" class="w-full border p-2 rounded text-sm" placeholder="Quantas TUGs (Uso Geral)?">
-                </div>`;
-                el.classList.remove('hidden'); el.classList.add('flex');
-                document.getElementById('g-modal-confirm').onclick = () => {
-                    const n = document.getElementById('m-r-name').value;
-                    if(n) {
-                        const newRoom = { id:Date.now(), name:n, floor:document.getElementById('m-r-floor').value, type:document.getElementById('m-r-type').value, items:[] };
-                        // Adiciona TUGs automaticamente baseado na NBR
-                        const tugCount = Number(document.getElementById('m-r-tugs').value) || 0;
-                        const roomType = newRoom.type;
-                        const rule = NBR.TUG_RULES[roomType] || NBR.TUG_RULES.living;
-                        const globalPF = Project.settings?.globalPF || 0.92;
-                        for (let i = 0; i < tugCount; i++) {
-                            let va = rule.base; if (rule.limit > 0 && i >= rule.limit) { va = rule.extra || 100; }
-                            newRoom.items.push({ id: Date.now() + i, type: 'outlet', name: `TUG ${i + 1}`, va: va, power: Math.round(va * globalPF), customVA: 0, modules: 1, isThreeWay: false, circuitId: null });
-                        }
-                        Project.rooms.push(newRoom); saveCloud(); window.app.closeModal();
-                    }
-                };
+                document.getElementById('g-modal-confirm').onclick = () => { r.name=document.getElementById('er-name').value; r.area=Number(document.getElementById('er-area').value); saveCloud(); window.app.closeModal(); };
             },
             modalAddItem: (rid) => {
-                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Adicionar Ponto";
-                const circs = Project.circuits.map(c => `<option value="${c.id}">${c.name} (${c.phase.toUpperCase()})</option>`).join('');
-                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><div class="grid grid-cols-2 gap-2"><select id="m-i-type" class="border p-2 rounded bg-white" onchange="toggleFields()"><option value="outlet">🔌 Tomada TUG</option><option value="outlet20">🛑 Tomada 20A</option><option value="switch">🔘 Interruptor</option><option value="light">💡 Iluminação</option><option value="equipment">❄️ Ar/Chuveiro/Outro</option></select><input id="m-i-name" class="border p-2 rounded" placeholder="Nome"></div><div id="div-modules" class="grid grid-cols-2 gap-2"><select id="m-i-mod" class="border p-2 rounded bg-white"><option value="1">1 Seção</option><option value="2">2 Seções</option><option value="3">3 Seções</option></select><label class="flex items-center gap-2 border p-2 rounded bg-slate-50"><input type="checkbox" id="m-i-3w"> Three-Way</label></div><div id="div-power"><input id="m-i-va" type="number" class="w-full border p-2 rounded" placeholder="Potência (VA)"><p class="text-[10px] text-slate-400 mt-1">Vazio = Auto NBR (p/ TUG)</p></div><select id="m-i-circ" class="w-full border p-2 rounded bg-white"><option value="">Sem Circuito</option>${circs}</select></div><script>function toggleFields(){const t=document.getElementById('m-i-type').value; const m=document.getElementById('div-modules'); if(t==='outlet'||t==='switch') m.classList.remove('hidden'); else m.classList.add('hidden');}<\/script>`;
+                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Adicionar Item";
+                const circs = Project.circuits.map(c => `<option value="${c.id}">C${Project.circuits.indexOf(c)+1} - ${c.name}</option>`).join('');
+                document.getElementById('g-modal-content').innerHTML = `
+                    <div class="space-y-3">
+                        <select id="m-i-type" class="w-full border p-2 rounded bg-white"><option value="outlet">Tomada</option><option value="light">Luz</option><option value="equipment">Equipamento</option></select>
+                        <input id="m-i-name" class="w-full border p-2 rounded" placeholder="Nome (ex: Ar Condicionado)">
+                        <input id="m-i-va" type="number" class="w-full border p-2 rounded" placeholder="Potência (VA/W)">
+                        <select id="m-i-circ" class="w-full border p-2 rounded bg-white"><option value="">Sem Circuito</option>${circs}</select>
+                    </div>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
                 document.getElementById('g-modal-confirm').onclick = () => {
-                    const type = document.getElementById('m-i-type').value; let va = Number(document.getElementById('m-i-va').value); const r = Project.rooms.find(x => x.id === rid); let customVA = va > 0 ? va : 0;
-                    if(type === 'outlet' && !va) { const tempIdx = r.items.filter(i => i.type === 'outlet').length; const rule = NBR.TUG_RULES[r.type] || NBR.TUG_RULES.living; if(rule.limit > 0) va = (tempIdx < rule.limit) ? rule.base : (rule.extra||100); else va = rule.base; } if(!va) va = (type === 'light') ? 100 : 0;
-                    r.items.push({ id: Date.now(), type, name: document.getElementById('m-i-name').value || 'Ponto', va, power: Math.round(va*(Project.settings?.globalPF||0.92)), customVA, modules: Number(document.getElementById('m-i-mod').value)||1, isThreeWay: document.getElementById('m-i-3w').checked, circuitId: document.getElementById('m-i-circ').value, pf: 1.0 });
-                    recalcAllTUGs(); saveCloud(); window.app.closeModal();
+                    const r = Project.rooms.find(x => x.id === rid);
+                    r.items.push({ id: Date.now(), type: document.getElementById('m-i-type').value, name: document.getElementById('m-i-name').value, va: Number(document.getElementById('m-i-va').value), circuitId: document.getElementById('m-i-circ').value });
+                    saveCloud(); window.app.closeModal();
                 };
             },
-            // ### FUNÇÃO EDITITEM ATUALIZADA (v17) ###
             editItem: (rid, iid) => {
-                const r = Project.rooms.find(x => x.id === rid); if(!r) return; const i = r.items.find(x => x.id === iid); if(!i) return;
-                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Item";
-                const circs = Project.circuits.map(c => `<option value="${c.id}" ${c.id==i.circuitId?'selected':''}>${c.name} (${c.phase.toUpperCase()})</option>`).join('');
-                
-                // Bloco de HTML condicional para seções e 3-way
-                let modulesHtml = '';
-                if (i.type === 'outlet' || i.type === 'switch') {
-                    modulesHtml = `
-                    <div class="grid grid-cols-2 gap-2">
-                        <select id="ei-mod" class="border p-2 rounded bg-white">
-                            <option value="1" ${ (i.modules || 1) == 1 ? 'selected' : ''}>1 Seção</option>
-                            <option value="2" ${ (i.modules || 1) == 2 ? 'selected' : ''}>2 Seções</option>
-                            <option value="3" ${ (i.modules || 1) == 3 ? 'selected' : ''}>3 Seções</option>
-                        </select>
-                        <label class="flex items-center gap-2 border p-2 rounded bg-slate-50 ${i.type === 'switch' ? '' : 'hidden'}">
-                            <input type="checkbox" id="ei-3w" ${i.isThreeWay ? 'checked' : ''}> Three-Way
-                        </label>
+                 const r = Project.rooms.find(x => x.id === rid); const i = r.items.find(x => x.id === iid);
+                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Item";
+                 const circs = Project.circuits.map(c => `<option value="${c.id}" ${c.id==i.circuitId?'selected':''}>C${Project.circuits.indexOf(c)+1} - ${c.name}</option>`).join('');
+                 document.getElementById('g-modal-content').innerHTML = `
+                    <div class="space-y-3">
+                        <input id="ei-name" class="w-full border p-2 rounded" value="${i.name}">
+                        <input id="ei-va" type="number" class="w-full border p-2 rounded" value="${i.va}">
+                        <select id="ei-circ" class="w-full border p-2 rounded bg-white"><option value="">Sem Circuito</option>${circs}</select>
                     </div>`;
-                }
-                
-                // HTML do modal atualizado
-                document.getElementById('g-modal-content').innerHTML = `
-                <div class="space-y-3 text-sm">
-                    <input id="ei-name" class="w-full border p-2 rounded" value="${i.name}">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input id="ei-va" type="number" class="border p-2 rounded" value="${i.va}" placeholder="Potência VA">
-                        <select id="ei-circ" class="border p-2 rounded bg-white"><option value="">--Sem Circuito--</option>${circs}</select>
-                    </div>
-                    ${modulesHtml}
-                </div>`;
-                
-                el.classList.remove('hidden'); el.classList.add('flex');
-                
-                // Lógica de confirmação atualizada
-                document.getElementById('g-modal-confirm').onclick = () => { 
-                    i.name = document.getElementById('ei-name').value; 
-                    i.va = Number(document.getElementById('ei-va').value); 
-                    i.customVA = i.va; 
-                    i.power = Math.round(i.va * (i.pf || Project.settings?.globalPF||0.92)); 
-                    i.circuitId = document.getElementById('ei-circ').value; 
-                    
-                    // Salva módulos e 3-way
-                    if (i.type === 'outlet' || i.type === 'switch') {
-                        i.modules = Number(document.getElementById('ei-mod').value) || 1;
-                        if (i.type === 'switch') {
-                            i.isThreeWay = document.getElementById('ei-3w').checked;
-                        }
-                    }
-                    
-                    saveCloud(); 
-                    window.app.closeModal(); 
-                };
-            },
-            editCircuit: (cid) => {
-                const c = Project.circuits.find(x => x.id === cid); if(!c) return;
-                const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = `Ajustar Circuito`;
-                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="ec-name" class="w-full border p-2 rounded" value="${c.name}"><div class="grid grid-cols-2 gap-2"><select id="ec-qd" class="w-full border p-2 rounded bg-white"><option value="terreo" ${c.qd=='terreo'?'selected':''}>Térreo</option><option value="superior" ${c.qd=='superior'?'selected':''}>Superior</option></select><select id="ec-phase" class="w-full border p-2 rounded bg-white"><option value="r" ${c.phase=='r'?'selected':''}>Fase R (Verm)</option><option value="s" ${c.phase=='s'?'selected':''}>Fase S (Preto)</option><option value="t" ${c.phase=='t'?'selected':''}>Fase T (Amar)</option></select></div><div class="grid grid-cols-2 gap-2"><select id="ec-gauge" class="w-full border p-2 rounded bg-white"><option value="1.5" ${c.gauge=='1.5'?'selected':''}>1.5mm</option><option value="2.5" ${c.gauge=='2.5'?'selected':''}>2.5mm</option><option value="4.0" ${c.gauge=='4.0'?'selected':''}>4.0mm</option><option value="6.0" ${c.gauge=='6.0'?'selected':''}>6.0mm</option><option value="10.0" ${c.gauge=='10.0'?'selected':''}>10mm</option></select><input id="ec-dist" type="number" class="w-full border p-2 rounded" value="${c.dist || 15}" placeholder="Dist. (m)"></div><input id="ec-amp" type="number" class="w-full border p-2 rounded border-yellow-300 bg-yellow-50" value="${c.customAmp || 0}" placeholder="Corrente Fixa (Opcional)"></div>`;
-                el.classList.remove('hidden'); el.classList.add('flex');
-                document.getElementById('g-modal-confirm').onclick = () => { c.name = document.getElementById('ec-name').value; c.qd = document.getElementById('ec-qd').value; c.phase = document.getElementById('ec-phase').value; c.gauge = document.getElementById('ec-gauge').value; c.customAmp = parseFloat(document.getElementById('ec-amp').value) || 0; c.dist = parseFloat(document.getElementById('ec-dist').value) || 15; saveCloud(); window.app.closeModal(); };
+                 el.classList.remove('hidden'); el.classList.add('flex');
+                 document.getElementById('g-modal-confirm').onclick = () => { i.name=document.getElementById('ei-name').value; i.va=Number(document.getElementById('ei-va').value); i.circuitId=document.getElementById('ei-circ').value; saveCloud(); window.app.closeModal(); };
             },
             promptAddCircuit: () => {
                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Novo Circuito";
-                document.getElementById('g-modal-content').innerHTML = `<div class="space-y-3 text-sm"><input id="c-name" class="w-full border p-2 rounded" placeholder="Nome"><div class="grid grid-cols-2 gap-2"><select id="c-qd" class="border p-2 rounded bg-white"><option value="terreo">Térreo</foption><option value="superior">Superior</option></select><select id="c-phase" class="border p-2 rounded bg-white font-bold"><option value="r">Fase R</option><option value="s">Fase S</option><option value="t">Fase T</option></select></div><select id="c-gauge" class="w-full border p-2 rounded bg-white"><option value="1.5">1.5mm</option><option value="2.5">2.5mm</option><option value="4.0">4.0mm</option><option value="6.0">6.0mm</option></select></div>`;
+                document.getElementById('g-modal-content').innerHTML = `<input id="c-name" class="w-full border p-2 rounded mb-2" placeholder="Nome"><div class="grid grid-cols-2 gap-2"><select id="c-ph" class="border p-2 rounded"><option value="r">R</option><option value="s">S</option><option value="t">T</option></select><select id="c-qd" class="border p-2 rounded"><option value="terreo">Térreo</option><option value="superior">Superior</option></select></div>`;
                 el.classList.remove('hidden'); el.classList.add('flex');
-                document.getElementById('g-modal-confirm').onclick = () => { Project.circuits.push({ id: Date.now(), name: document.getElementById('c-name').value, qd: document.getElementById('c-qd').value, phase: document.getElementById('c-phase').value, gauge: document.getElementById('c-gauge').value, dist: 15, customAmp: 0, pf: Project.settings?.globalPF||0.92, usage: 'power' }); saveCloud(); window.app.closeModal(); };
+                document.getElementById('g-modal-confirm').onclick = () => { Project.circuits.push({ id: Date.now(), name: document.getElementById('c-name').value, phase: document.getElementById('c-ph').value, qd: document.getElementById('c-qd').value, gauge: '2.5', dist: 15 }); saveCloud(); window.app.closeModal(); };
             },
-            editPrice: (k) => {
-                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Editar Preço";
-                 document.getElementById('g-modal-content').innerHTML = `<input id="m-price" type="number" class="w-full border p-2 rounded" step="0.01" value="${Project.prices[k]}">`;
+            promptAddRoom: () => {
+                 const el = document.getElementById('generic-modal'); document.getElementById('g-modal-title').innerText = "Novo Cômodo";
+                 document.getElementById('g-modal-content').innerHTML = `
+                    <input id="nr-name" class="w-full border p-2 rounded mb-2" placeholder="Nome">
+                    <input id="nr-area" type="number" class="border p-2 rounded w-full mb-2" placeholder="Área (m²)">
+                    <select id="nr-floor" class="w-full border p-2 rounded mb-2">
+                        <option value="terreo">Térreo</option>
+                        <option value="superior">Superior</option>
+                        <option value="subsolo">Subsolo</option>
+                    </select>
+                    <select id="nr-type" class="w-full border p-2 rounded">
+                        <option value="living">Sala/Quarto</option>
+                        <option value="kitchen">Cozinha/Serviço</option>
+                        <option value="bathroom">Banheiro</option>
+                    </select>`;
                  el.classList.remove('hidden'); el.classList.add('flex');
-                 document.getElementById('g-modal-confirm').onclick = () => { Project.prices[k] = Number(document.getElementById('m-price').value); saveCloud(); window.app.closeModal(); };
+                 document.getElementById('g-modal-confirm').onclick = () => { 
+                     const n = document.getElementById('nr-name').value; 
+                     const a = Number(document.getElementById('nr-area').value); 
+                     const t = document.getElementById('nr-type').value;
+                     const f = document.getElementById('nr-floor').value;
+                     if(n && a) { 
+                        Project.rooms.push({ id: Date.now(), name: n, area: a, type: t, floor: f, items: [] }); 
+                        saveCloud(); 
+                        window.app.closeModal(); 
+                     }
+                 };
             },
-            // Funções de exclusão
-            delItem: (rid, iid) => { const r = Project.rooms.find(x => x.id === rid); if(r){ r.items = r.items.filter(i => i.id !== iid); recalcAllTUGs(); saveCloud(); } },
-            delRoom: (id) => { Project.rooms = Project.rooms.filter(x => x.id !== id); saveCloud(); },
+            delRoom: (rid) => {
+                const r = Project.rooms.find(x => x.id === rid);
+                if(!r) return; 
+
+                const el = document.getElementById('generic-modal'); 
+                document.getElementById('g-modal-title').innerText = "Excluir Cômodo";
+                document.getElementById('g-modal-content').innerHTML = `
+                    <div class="text-center p-4">
+                        <p class="text-slate-700 mb-2">Tem certeza que deseja excluir <strong>${r.name}</strong>?</p>
+                        <p class="text-xs text-red-500">Essa ação não pode ser desfeita.</p>
+                    </div>`;
+                
+                const btn = document.getElementById('g-modal-confirm');
+                const originalBtnClass = btn.className; 
+                btn.className = "px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold text-xs shadow"; 
+                btn.innerText = "Sim, Excluir";
+
+                el.classList.remove('hidden'); 
+                el.classList.add('flex');
+
+                btn.onclick = () => { 
+                    Project.rooms = Project.rooms.filter(x => x.id !== rid); 
+                    saveCloud(); 
+                    window.app.closeModal();
+                    
+                    btn.className = "px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-bold text-xs shadow";
+                    btn.innerText = "Confirmar";
+                };
+            },
+            delItem: (rid, iid) => { const r = Project.rooms.find(x => x.id === rid); if(r){ r.items = r.items.filter(i => i.id !== iid); saveCloud(); } },
             delCirc: (id) => { Project.circuits = Project.circuits.filter(x => x.id !== id); saveCloud(); },
-            // Navegação
             filterFloor: (f, btn) => { currentFloorFilter = f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderRooms(); },
             setTab: (id) => { 
                 document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); 
+                document.querySelectorAll('#nav-rooms, #nav-circuits, #nav-steps, #nav-bom').forEach(e => {
+                    e.classList.remove('text-indigo-600', 'bg-white', 'shadow-sm');
+                    e.classList.add('text-slate-500');
+                });
+                
                 document.getElementById('tab-'+id).classList.add('active'); 
-                // Atualiza abas do desktop
-                document.querySelectorAll('#mobile-menu button, .md\\:flex .gap-1 button').forEach(b => b.classList.remove('text-indigo-600', 'bg-white', 'shadow-sm'));
-                document.querySelectorAll('.md\\:flex .gap-1 button').forEach(b => b.classList.add('text-slate-500'));
-                document.querySelectorAll('#nav-'+id).forEach(b=>b.classList.add('text-indigo-600', 'bg-white', 'shadow-sm'));
-                document.querySelectorAll('#nav-'+id).forEach(b=>b.classList.remove('text-slate-500'));
-                // Atualiza abas mobile
-                document.querySelectorAll('#mobile-menu button').forEach(b => b.classList.add('text-slate-400'));
-                document.querySelectorAll('#mob-'+id).forEach(b=>b.classList.add('text-indigo-600'));
-                document.querySelectorAll('#mob-'+id).forEach(b=>b.classList.remove('text-slate-400'));
-            },
-            // Funções de Autenticação
-            switchAuthMode: m => { 
-                document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); 
-                document.getElementById('tab-'+m).classList.add('active'); 
-                document.getElementById('btn-auth-action').innerText = m==='login'?'ACESSAR PROJETO':'CRIAR CONTA'; 
+                const navBtn = document.getElementById('nav-'+id);
+                if(navBtn) {
+                    navBtn.classList.remove('text-slate-500');
+                    navBtn.classList.add('text-indigo-600', 'bg-white', 'shadow-sm');
+                }
+
+                if(id==='steps') renderDidacticMemory(); 
             },
             handleAuthAction: async () => {
-                const e = document.getElementById('auth-email').value; const p = document.getElementById('auth-pass').value; 
-                const btn = document.getElementById('btn-auth-action'); const errorDiv = document.getElementById('auth-error');
-                if(!e || !p) { 
-                    btn.classList.add('shake'); setTimeout(() => btn.classList.remove('shake'), 500); 
-                    errorDiv.innerText = "Preencha e-mail e senha!"; errorDiv.classList.remove('hidden'); return; 
-                }
-                btn.innerText = "Carregando..."; btn.disabled = true; errorDiv.classList.add('hidden');
+                document.getElementById('btn-enter').disabled = true;
+                document.getElementById('btn-enter').innerHTML = 'Entrando...';
+                document.getElementById('loading-indicator').classList.remove('hidden');
                 try { 
-                    if(document.getElementById('tab-login').classList.contains('active')) 
-                        await signInWithEmailAndPassword(AUTH, e, p); // Login
-                    else 
-                        await createUserWithEmailAndPassword(AUTH, e, p); // Registro
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(AUTH, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(AUTH); 
+                    }
                 } catch(err) { 
-                    btn.disabled = false; btn.innerText = "TENTAR NOVAMENTE"; 
-                    errorDiv.classList.remove('hidden'); 
-                    errorDiv.innerText = err.code.includes('password') ? "Senha incorreta" : (err.code.includes('email-already-in-use') ? "Email já cadastrado." : "Erro: " + err.code); 
-                }
+                    alert("Erro ao entrar: " + err.message); 
+                    document.getElementById('btn-enter').disabled = false;
+                    document.getElementById('btn-enter').innerHTML = 'ENTRAR MANUALMENTE';
+                    document.getElementById('loading-indicator').classList.add('hidden');
+                } 
             },
-            handleLogout: () => signOut(AUTH).then(()=>location.reload())
+            handleLogout: () => location.reload()
         };
     </script>
 </body>
